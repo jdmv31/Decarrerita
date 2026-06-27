@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte de Traslados - Decarrerita</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='style.css') }}">
+</head>
+<body>
+    <div class="contenedor" style="width: 80%; max-width: 800px;">
+        <h1>Reporte General de Traslados</h1>
+        
+        <table style="width: 100%; border-collapse: collapse; margin-top: 20px; text-align: left;">
+            <thead>
+                <tr style="background-color: #007bff; color: white;">
+                    <th style="padding: 10px;">ID Viaje</th>
+                    <th style="padding: 10px;">Origen</th>
+                    <th style="padding: 10px;">Destino</th>
+                    <th style="padding: 10px;">Distancia (km)</th>
+                    <th style="padding: 10px;">Costo</th>
+                    <th style="padding: 10px;">Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for viaje in viajes %}
+                <tr style="border-bottom: 1px solid #ddd;">
+                    <td style="padding: 10px;">{{ viaje.id }}</td>
+                    <td style="padding: 10px;">{{ viaje.lugar_inicio }}</td>
+                    <td style="padding: 10px;">{{ viaje.lugar_destino }}</td>
+                    <td style="padding: 10px;">{{ viaje.distancia }}</td>
+                    <td style="padding: 10px;">${{ viaje.costo_viaje }}</td>
+                    <td style="padding: 10px;">{{ viaje.estado_viaje.value }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" style="padding: 15px; text-align: center;">No hay viajes registrados en la base de datos todavía.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <a href="/" style="display: block; margin-top: 20px; text-decoration: none; color: #007bff;">Volver al Inicio</a>
+    </div>
+</body>
+</html>

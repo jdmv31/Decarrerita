@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decarrerita - Inicio</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='style.css') }}">
+</head>
+<body>
+
+    <div class="contenedor">
+        <h1>Decarrerita</h1>
+
+        <div id="seccion-login">
+            <h2>Iniciar Sesión</h2>
+            <form action="/login" method="POST">
+                <input type="email" name="correo" placeholder="Correo Electrónico" required>
+                <input type="password" name="password" placeholder="Contraseña" required>
+                <button type="submit">Entrar</button>
+            </form>
+            <span class="toggle-link" onclick="cambiarFormulario('registro')">¿No tienes cuenta? Regístrate aquí</span>
+        </div>
+
+        <div id="seccion-registro" style="display: none;">
+            <h2>Registrarse</h2>
+            <form action="/registro" method="POST">
+                <input type="text" name="nombre" placeholder="Nombre" required>
+                <input type="text" name="apellido" placeholder="Apellido" required>
+                <input type="text" name="cedula" placeholder="Cédula" required>
+                <input type="email" name="correo" placeholder="Correo Electrónico" required>
+                <input type="password" name="password" placeholder="Contraseña" required>
+                
+                <select name="direccion" required>
+                    <option value="" disabled>Selecciona tu estado</option>
+                    <option value="Amazonas">Amazonas</option>
+                    <option value="Anzoátegui">Anzoátegui</option>
+                    <option value="Apure">Apure</option>
+                    <option value="Aragua">Aragua</option>
+                    <option value="Barinas">Barinas</option>
+                    <option value="Bolívar" selected>Bolívar</option>
+                    <option value="Carabobo">Carabobo</option>
+                    <option value="Cojedes">Cojedes</option>
+                    <option value="Delta Amacuro">Delta Amacuro</option>
+                    <option value="Distrito Capital">Distrito Capital</option>
+                    <option value="Falcón">Falcón</option>
+                    <option value="Guárico">Guárico</option>
+                    <option value="Lara">Lara</option>
+                    <option value="Mérida">Mérida</option>
+                    <option value="Miranda">Miranda</option>
+                    <option value="Monagas">Monagas</option>
+                    <option value="Nueva Esparta">Nueva Esparta</option>
+                    <option value="Portuguesa">Portuguesa</option>
+                    <option value="Sucre">Sucre</option>
+                    <option value="Táchira">Táchira</option>
+                    <option value="Trujillo">Trujillo</option>
+                    <option value="La Guaira">La Guaira</option>
+                    <option value="Yaracuy">Yaracuy</option>
+                    <option value="Zulia">Zulia</option>
+                </select>
+
+                <select name="rol" required>
+                    <option value="" disabled selected>Selecciona un rol</option>
+                    <option value="cliente">Cliente</option>
+                    <option value="chofer">Chofer</option>
+                </select>
+                
+                <button type="submit">Crear Cuenta</button>
+            </form>
+            <span class="toggle-link" onclick="cambiarFormulario('login')">¿Ya tienes cuenta? Inicia sesión aquí</span>
+        </div>
+    </div>
+
+    <script>
+        function cambiarFormulario(vista) {
+            const login = document.getElementById('seccion-login');
+            const registro = document.getElementById('seccion-registro');
+
+            if (vista === 'registro') {
+                login.style.display = 'none';
+                registro.style.display = 'block';
+            } else {
+                registro.style.display = 'none';
+                login.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>
