@@ -1,12 +1,8 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Decarrerita - Inicio</title>
-    <link rel="stylesheet" href="{{ url_for('static', path='style.css') }}">
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block title %}Decarrerita - Inicio{% endblock %}
+
+{% block content %}
 
     <div class="contenedor">
         <h1>Decarrerita</h1>
@@ -66,7 +62,7 @@
                 
                 <button type="submit">Crear Cuenta</button>
             </form>
-            <span class="toggle-link" onclick="cambiarFormulario('login')">¿Ya tienes cuenta? Inicia sesión aquí</span>
+            <span class="toggle-link" onclick="cambiarFormulario('login')">¿Ya tienes cuenta? Inicia sesión aquís</span>
         </div>
     </div>
 
@@ -84,5 +80,4 @@
             }
         }
     </script>
-</body>
-</html>
+{% endblock %}
