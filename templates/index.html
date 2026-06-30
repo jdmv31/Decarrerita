@@ -4,80 +4,88 @@
 
 {% block content %}
 
-    <div class="contenedor">
-        <h1>Decarrerita</h1>
+{% block body_class %}pantalla-login{% endblock %}
+    <div class="escena-3d">
+        <div class="tarjeta-3d" id="tarjeta-login-registro">
+            
+            <div class="cara-tarjeta cara-frontal">
+                <img src="{{ url_for('static', path='images/logo.png') }}" class="imagen-tope" alt="Logo">
+                <h2>Iniciar Sesión</h2>
+                <form action="/login" method="POST">
+                    <input type="email" name="correo" placeholder="Correo Electrónico" required>
+                    <input type="password" name="password" placeholder="Contraseña" required>
+                    <button type="submit">Entrar</button>
+                </form>
+                <span class="toggle-link" onclick="cambiarFormulario(event)">¿No tienes cuenta? Regístrate aquí</span>
+            </div>
 
-        <div id="seccion-login">
-            <h2>Iniciar Sesión</h2>
-            <form action="/login" method="POST">
-                <input type="email" name="correo" placeholder="Correo Electrónico" required>
-                <input type="password" name="password" placeholder="Contraseña" required>
-                <button type="submit">Entrar</button>
-            </form>
-            <span class="toggle-link" onclick="cambiarFormulario('registro')">¿No tienes cuenta? Regístrate aquí</span>
-        </div>
+            <div class="cara-tarjeta cara-trasera">
+                <h2>Registrarse</h2>
+                <form action="/registro" method="POST">
+                    <input type="text" name="nombre" placeholder="Nombre" required>
+                    <input type="text" name="apellido" placeholder="Apellido" required>
+                    <input type="text" name="cedula" placeholder="Cédula" required>
+                    <input type="email" name="correo" placeholder="Correo Electrónico" required>
+                    <input type="password" name="password" placeholder="Contraseña" required>
+                    
+                    <select name="direccion" required>
+                        <option value="" disabled>Selecciona tu estado</option>
+                        <option value="Amazonas">Amazonas</option>
+                        <option value="Anzoátegui">Anzoátegui</option>
+                        <option value="Apure">Apure</option>
+                        <option value="Aragua">Aragua</option>
+                        <option value="Barinas">Barinas</option>
+                        <option value="Bolívar" selected>Bolívar</option>
+                        <option value="Carabobo">Carabobo</option>
+                        <option value="Cojedes">Cojedes</option>
+                        <option value="Delta Amacuro">Delta Amacuro</option>
+                        <option value="Distrito Capital">Distrito Capital</option>
+                        <option value="Falcón">Falcón</option>
+                        <option value="Guárico">Guárico</option>
+                        <option value="Lara">Lara</option>
+                        <option value="Mérida">Mérida</option>
+                        <option value="Miranda">Miranda</option>
+                        <option value="Monagas">Monagas</option>
+                        <option value="Nueva Esparta">Nueva Esparta</option>
+                        <option value="Portuguesa">Portuguesa</option>
+                        <option value="Sucre">Sucre</option>
+                        <option value="Táchira">Táchira</option>
+                        <option value="Trujillo">Trujillo</option>
+                        <option value="La Guaira">La Guaira</option>
+                        <option value="Yaracuy">Yaracuy</option>
+                        <option value="Zulia">Zulia</option>
+                    </select>
 
-        <div id="seccion-registro" style="display: none;">
-            <h2>Registrarse</h2>
-            <form action="/registro" method="POST">
-                <input type="text" name="nombre" placeholder="Nombre" required>
-                <input type="text" name="apellido" placeholder="Apellido" required>
-                <input type="text" name="cedula" placeholder="Cédula" required>
-                <input type="email" name="correo" placeholder="Correo Electrónico" required>
-                <input type="password" name="password" placeholder="Contraseña" required>
-                
-                <select name="direccion" required>
-                    <option value="" disabled>Selecciona tu estado</option>
-                    <option value="Amazonas">Amazonas</option>
-                    <option value="Anzoátegui">Anzoátegui</option>
-                    <option value="Apure">Apure</option>
-                    <option value="Aragua">Aragua</option>
-                    <option value="Barinas">Barinas</option>
-                    <option value="Bolívar" selected>Bolívar</option>
-                    <option value="Carabobo">Carabobo</option>
-                    <option value="Cojedes">Cojedes</option>
-                    <option value="Delta Amacuro">Delta Amacuro</option>
-                    <option value="Distrito Capital">Distrito Capital</option>
-                    <option value="Falcón">Falcón</option>
-                    <option value="Guárico">Guárico</option>
-                    <option value="Lara">Lara</option>
-                    <option value="Mérida">Mérida</option>
-                    <option value="Miranda">Miranda</option>
-                    <option value="Monagas">Monagas</option>
-                    <option value="Nueva Esparta">Nueva Esparta</option>
-                    <option value="Portuguesa">Portuguesa</option>
-                    <option value="Sucre">Sucre</option>
-                    <option value="Táchira">Táchira</option>
-                    <option value="Trujillo">Trujillo</option>
-                    <option value="La Guaira">La Guaira</option>
-                    <option value="Yaracuy">Yaracuy</option>
-                    <option value="Zulia">Zulia</option>
-                </select>
+                    <select name="rol" required>
+                        <option value="" disabled selected>Selecciona un rol</option>
+                        <option value="cliente">Cliente</option>
+                        <option value="chofer">Chofer</option>
+                    </select>
+                    
+                    <button type="submit">Crear Cuenta</button>
+                </form>
+                <span class="toggle-link" onclick="cambiarFormulario(event)">¿Ya tienes cuenta? Inicia sesión aquí</span>
+            </div>
 
-                <select name="rol" required>
-                    <option value="" disabled selected>Selecciona un rol</option>
-                    <option value="cliente">Cliente</option>
-                    <option value="chofer">Chofer</option>
-                </select>
-                
-                <button type="submit">Crear Cuenta</button>
-            </form>
-            <span class="toggle-link" onclick="cambiarFormulario('login')">¿Ya tienes cuenta? Inicia sesión aquís</span>
         </div>
     </div>
 
     <script>
-        function cambiarFormulario(vista) {
-            const login = document.getElementById('seccion-login');
-            const registro = document.getElementById('seccion-registro');
+        function cambiarFormulario(event) {
+        // Esto evita que el navegador intente hacer otra cosa (como recargar la página)
+            if(event) event.preventDefault();
 
-            if (vista === 'registro') {
-                login.style.display = 'none';
-                registro.style.display = 'block';
+        // Buscamos la tarjeta
+            const tarjeta = document.getElementById('tarjeta-login-registro');
+        
+        // Verificamos si realmente la encontró antes de intentar girarla
+            if (tarjeta) {
+                tarjeta.classList.toggle('girada');
+                console.log("¡El Javascript funcionó! Se aplicó la clase 'girada'.");
             } else {
-                registro.style.display = 'none';
-                login.style.display = 'block';
+                console.error("Fallo de JS: No se encontró el elemento con ID 'tarjeta-login-registro'.");
             }
         }
     </script>
+
 {% endblock %}
