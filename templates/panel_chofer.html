@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Choferes</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='style.css') }}">
+</head>
+<body>
+    <div class="contenedor" style="width: 350px;">
+        <h1>Panel Chofer</h1>
+
+        {% if puntuacion != 0 %}
+            <div style="background-color: #fff3cd; color: #856404; padding: 15px; border-radius: 5px; margin-bottom: 20px; text-align: left; font-size: 0.9em;">
+                <h3 style="margin-top: 0;">Cuenta en Revisión</h3>
+                <p>Estamos confirmando tu identidad. Un administrador evaluará tu registro pronto para que puedas comenzar a gestionar tus vehículos y aceptar viajes.</p>
+            </div>
+            
+            <a href="/">
+                <button style="background-color: #6c757d;">Cerrar Sesión</button>
+            </a>
+
+        {% else %}
+            <div style="background-color: #d4edda; color: #155724; padding: 10px; border-radius: 5px; margin-bottom: 20px; font-size: 0.9em;">
+                Estado: <strong>Aprobado</strong> (Puntuación: {{ puntuacion }}/100)
+            </div>
+
+            <h3 style="text-align: left; margin-bottom: 10px;">Acciones</h3>
+            
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <a href="/chofer/traslados"><button>Chequear Traslados</button></a>
+                <a href="/chofer/perfil"><button>Datos Personales</button></a>
+                <a href="/chofer/vehiculo?id_chofer={{ id_chofer }}"><button>Gestionar Vehículo</button></a>
+                <a href="/chofer/viaje-actual"><button>Historial de Viajes</button></a>
+                <a href="/chofer/datos-bancarios?id_chofer = {{id_chofer}}"><button>Gestionar Datos Bancarios</button></a>
+                <button onclick="abrirEstado()">Modificar Disponibilidad</button>
+                <div id="modalEstado" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 1000;">
+                    <div style="background: white; padding: 25px; border-radius: 8px; width: 300px; text-align: center; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
+                        <h3 style="margin-top: 0; color: #333;">Cambiar Disponibilidad</h3>
+                        
+                        <form action="/chofer/estado" method="POST">
+                            <input type="hidden" name="id_chofer" value="{{ id_chofer }}">
+                            
+                            <select name="estado_nuevo" required style="width: 100%; padding: 10px; margin-bottom: 20px; border-radius: 4px; border: 1px solid #ccc;">
+                                <option value="DISPONIBLE">Disponible</option>
+                                <option value="EN_VIAJE">En Viaje</option>
+                                <option value="DESCONECTADO">Desconectado</option>
+                            </select>
+                            
+                            <button type="submit" style="width: 100%; margin-bottom: 10px;">Guardar Cambio</button>
+                            <button type="button" onclick="cerrarEstado()" style="width: 100%; background-color: #d41f31d3;">Cancelar</button>
+                        </form>
+                    </div>
+                </div>
+
+                <script>
+                    function abrirEstado() {
+                        document.getElementById('modalEstado').style.display = 'flex';
+                    }
+
+                    function cerrarEstado() {
+                        document.getElementById('modalEstado').style.display = 'none';
+                    }
+                </script>
+            </div>
+
+            <a href="/" style="display: block; margin-top: 20px; text-decoration: none; color: #dc3545; font-size: 0.9em;">
+                Cerrar Sesión
+            </a>
+        {% endif %}
+    </div>
+</body>
+</html>

@@ -1,7 +1,13 @@
 from sqlalchemy import Column, Integer, String, Float, ForeignKey, Date, Enum
 from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
 from database import Base
 import enum
+
+class EstadoChofer (enum.Enum):
+    DISPONIBLE = "DISPONIBLE"
+    EN_VIAJE = "EN VIAJE"
+    DESCONECTADO = "DESCONECTADO"
 
 class EstadoViaje(enum.Enum):
     CANCELADO = "cancelado"
@@ -29,6 +35,7 @@ class Choferes(Base):
     id = Column(Integer,ForeignKey("usuarios.id"),primary_key = True)
     calificacion = Column(Float, default = 0.0)
     saldo_pendiente = Column(Float, default = 0.0)
+    estado_chofer = Column(Enum(EstadoChofer),default = EstadoChofer.DESCONECTADO)
 
 class Pasajeros(Base):
     __tablename__ = "pasajeros"
@@ -70,7 +77,7 @@ class EvaluacionChofer(Base):
     id = Column(Integer,primary_key = True)
     id_chofer = Column(Integer, ForeignKey("choferes.id"))
     puntuacion = Column(Integer, nullable = False)
-    fecha_evaluacion = Column(Date, nullable = False)
+    fecha_evaluacion = Column(Date, server_default=func.current_date())
 
 class ContactosEmergencia(Base):
     __tablename__ = "contactosemergencia"
@@ -84,7 +91,7 @@ class DatosBancarios(Base):
     id = Column(Integer,primary_key = True)
     id_chofer = Column(Integer, ForeignKey("choferes.id"))
     id_banco = Column(Integer,ForeignKey("banco.id"))
-    numero_cuenta = Column(Integer, unique = True, nullable = False)
+    numero_cuenta = Column(String, unique = True, nullable = False)
 
 class PagosChoferes(Base):
     __tablename__ = "pagoschoferes"

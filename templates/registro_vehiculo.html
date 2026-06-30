@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar Vehículo - Decarrerita</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='style.css') }}">
+</head>
+<body>
+    <div class="contenedor">
+        <h1>Registrar Vehículo</h1>
+        <p style="font-size: 0.9em; color: #555;">Ingresa los datos del vehículo que utilizarás para los traslados.</p>
+
+        <form action="/chofer/vehiculo" method="POST">
+            <input type="hidden" name="id_chofer" value="{{ id_chofer }}">
+            <input type="text" name="placa" placeholder="Placa (Ej. AA11BB)" required>
+            <input type="text" name="marca" placeholder="Marca (Ej. Chevrolet)" required>
+            <input type="text" name="modelo" placeholder="Modelo (Ej. Aveo)" required>
+            <input type="text" name="color" placeholder="Color" required>
+            <input type="text" name="anio" placeholder="Año" required>
+            <button type="submit" style="margin-top: 15px;">Guardar Vehículo</button>
+        </form>
+
+        <a href="/panel-chofer" style="display: block; margin-top: 15px; text-decoration: none; color: #6c757d; font-size: 0.9em;">
+            Cancelar y Volver
+        </a>
+    </div>
+</body>
+</html>

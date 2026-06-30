@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Perfil - Decarrerita</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='style.css') }}">
+</head>
+<body>
+    <div class="contenedor" style="width: 400px;">
+        <h1>Mi Perfil</h1>
+        
+        <div style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: left; border: 1px solid #dee2e6;">
+            <h3 style="margin-top: 0; color: #333; border-bottom: 1px solid #ccc; padding-bottom: 5px;">Información Personal</h3>
+            <p><strong>Nombre:</strong> {{ usuario.nombre }} {{ usuario.apellido }}</p>
+            <p><strong>Cédula:</strong> {{ usuario.cedula }}</p>
+            <p><strong>Correo:</strong> {{ usuario.correo }}</p>
+            <p><strong>Dirección:</strong> {{ usuario.direccion }}</p>
+        </div>
+
+        <div style="background-color: #e9ecef; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: left; border: 1px solid #ced4da;">
+            <h3 style="margin-top: 0; color: #333; border-bottom: 1px solid #ccc; padding-bottom: 5px;">Desempeño General</h3>
+            
+            <p><strong>Calificación de Pasajeros:</strong> {{ chofer.calificacion }} / 5.0</p>
+            
+            <p><strong>Evaluación Psicologica:</strong> 
+                {% if evaluacion and evaluacion.puntuacion > 0 %}
+                    <span style="color: green; font-weight: bold;">{{ evaluacion.puntuacion }} / 100 pts</span>
+                {% else %}
+                    <span style="color: #856404;">Pendiente por el Administrador</span>
+                {% endif %}
+            </p>
+            <p><strong>Saldo Pendiente:</strong> ${{ chofer.saldo_pendiente }}</p>
+        </div>
+
+        <a href="/panel-chofer?puntuacion={{ evaluacion.puntuacion if evaluacion else 0 }}&id_chofer={{ id_chofer }}" style="display: block; margin-top: 15px; text-decoration: none; color: #007bff; font-weight: bold;">
+            Volver al Panel Principal
+        </a>
+    </div>
+</body>
+</html>
