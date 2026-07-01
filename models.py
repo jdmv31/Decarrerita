@@ -16,7 +16,7 @@ class EstadoViaje(enum.Enum):
 
 class RevisionVehiculo(Base):
     __tablename__ = "revisionvehiculo"
-    id = Column(Integer,primary_key = True, index = True)
+    id_revision = Column(Integer,primary_key = True, index = True)
     id_vehiculo = Column(String,ForeignKey("vehiculos.matricula"))
     puntuacion = Column(Float,nullable = False)
     fecha_revision = Column(Date,nullable = False)
@@ -24,45 +24,58 @@ class RevisionVehiculo(Base):
 class Vehiculos (Base):
     __tablename__ = "vehiculos"
     matricula = Column(String,primary_key = True, index = True)
-    id_chofer = Column(Integer,ForeignKey("choferes.id"))
+    id_chofer = Column(Integer,ForeignKey("choferes.id_chofer"))
     marca = Column(String, nullable = False)
     modelo = Column(String, nullable = False)
     annio = Column(Integer, nullable = False)
     color = Column(String, nullable = False)
 
+class ContactosEmergencia(Base):
+    __tablename__ = "contactosemergencia"
+    id_contacto = Column(Integer,primary_key = True)
+    numero_telefonico = Column(String, nullable = False)
+
+class AgendaContactos(Base):
+    __tablename__ = "agendacontactos"
+    id_agenda = Column(Integer,primary_key=True)
+    id_chofer = Column(Integer,ForeignKey("choferes.id_chofer"))
+    id_contacto = Column(Integer,ForeignKey("contactosemergencia.id_contacto"))
+    nombre_contacto = Column(String,nullable = False)
+
+
 class Choferes(Base):
     __tablename__ = "choferes"
-    id = Column(Integer,ForeignKey("usuarios.id"),primary_key = True)
+    id_chofer = Column(Integer,ForeignKey("usuarios.id_usuario"),primary_key = True)
     calificacion = Column(Float, default = 0.0)
     saldo_pendiente = Column(Float, default = 0.0)
     estado_chofer = Column(Enum(EstadoChofer),default = EstadoChofer.DESCONECTADO)
 
 class Pasajeros(Base):
     __tablename__ = "pasajeros"
-    id = Column(Integer,ForeignKey("usuarios.id"),primary_key = True)
+    id_pasajero = Column(Integer,ForeignKey("usuarios.id_usuario"),primary_key = True)
     saldo_disponible = Column(Float, default = 0.0)
     calificacion = Column(Float, default = 0.0)    
 
 class Banco (Base):
     __tablename__ = "banco"
-    id = Column(Integer, primary_key = True)
+    id_banco = Column(Integer, primary_key = True)
     nombre = Column(String, nullable = False)
 
 class HistorialRecargas(Base):
     __tablename__ = "historialrecargas"
-    id = Column(Integer,primary_key = True)
-    id_pasajero = Column(Integer,ForeignKey("pasajeros.id"))
-    id_banco = Column(Integer,ForeignKey("banco.id"))
+    id_historial = Column(Integer,primary_key = True)
+    id_pasajero = Column(Integer,ForeignKey("pasajeros.id_pasajero"))
+    id_banco = Column(Integer,ForeignKey("banco.id_banco"))
     fecha = Column(Date, nullable = False)
     numero_referencia = Column(Integer, unique = True)
     monto_recargado = Column(Float, nullable = False)
 
 class Viajes (Base):
     __tablename__ = "viajes"
-    id = Column(Integer, primary_key = True)
+    id_viaje = Column(Integer, primary_key = True)
     id_vehiculo = Column(String,ForeignKey("vehiculos.matricula"))
-    id_chofer = Column(Integer,ForeignKey("choferes.id"))
-    id_pasajero = Column(Integer,ForeignKey("pasajeros.id"))
+    id_chofer = Column(Integer,ForeignKey("choferes.id_chofer"))
+    id_pasajero = Column(Integer,ForeignKey("pasajeros.id_pasajero"))
     duracion = Column(Float, nullable = False)
     distancia = Column (Float, nullable = False)
     lugar_inicio = Column(String, nullable = False)
@@ -74,38 +87,31 @@ class Viajes (Base):
 
 class EvaluacionChofer(Base):
     __tablename__ = "evaluacionchofer"
-    id = Column(Integer,primary_key = True)
-    id_chofer = Column(Integer, ForeignKey("choferes.id"))
+    id_evaluacion = Column(Integer,primary_key = True)
+    id_chofer = Column(Integer, ForeignKey("choferes.id_chofer"))
     puntuacion = Column(Integer, nullable = False)
     fecha_evaluacion = Column(Date, server_default=func.current_date())
 
-class ContactosEmergencia(Base):
-    __tablename__ = "contactosemergencia"
-    id = Column(Integer,primary_key = True)
-    id_chofer = Column(Integer, ForeignKey("choferes.id"))
-    numero_telefonico = Column(String, nullable = False)
-    nombre_contacto = Column(String, nullable = False)
-
 class DatosBancarios(Base):
     __tablename__ = "datosbancarios"
-    id = Column(Integer,primary_key = True)
-    id_chofer = Column(Integer, ForeignKey("choferes.id"))
-    id_banco = Column(Integer,ForeignKey("banco.id"))
+    id_datos = Column(Integer,primary_key = True)
+    id_chofer = Column(Integer, ForeignKey("choferes.id_chofer"))
+    id_banco = Column(Integer,ForeignKey("banco.id_banco"))
     numero_cuenta = Column(String, unique = True, nullable = False)
 
 class PagosChoferes(Base):
     __tablename__ = "pagoschoferes"
-    id = Column(Integer,primary_key = True)
-    id_viaje = Column(Integer,ForeignKey("viajes.id"))
-    id_administrador = Column(Integer,ForeignKey("usuarios.id"))
-    id_chofer = Column (Integer,ForeignKey("choferes.id"))
+    id_pago = Column(Integer,primary_key = True)
+    id_viaje = Column(Integer,ForeignKey("viajes.id_viaje"))
+    id_administrador = Column(Integer,ForeignKey("usuarios.id_usuario"))
+    id_chofer = Column (Integer,ForeignKey("choferes.id_chofer"))
     fecha_pago = Column (Date,nullable = False)
     numero_referencia = Column (Integer, unique = True, nullable = False)
     monto_cancelado = Column (Float, nullable = False)
 
 class Usuarios(Base):
     __tablename__ = "usuarios"
-    id = Column(Integer,primary_key = True)
+    id_usuario = Column(Integer,primary_key = True)
     nombre = Column(String,nullable = False)
     apellido = Column(String, nullable = False)
     direccion = Column(String, nullable = False)

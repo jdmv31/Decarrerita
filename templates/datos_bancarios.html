@@ -11,7 +11,7 @@
         <h1>Datos Bancarios</h1>
         <p style="font-size: 0.9em; color: #555;">Ingrese sus datos bancarios</p>
 
-        <form action="/chofer/datos-bancarios" method="POST">
+        <form action="/chofer/registrar-datos" method="POST">
             <input type="hidden" name="id_chofer" value="{{ id_chofer }}">
             <select name="banco" required style="width: 100%; padding: 10px; border-radius: 4px; border: 1px solid #ccc;">
                 <option value="" disabled selected>Seleccione su banco</option>
@@ -36,7 +36,7 @@
             <button type="submit" style="margin-top: 15px;">Registrar Datos</button>
         </form>
 
-        <a href="/panel-chofer" style="display: block; margin-top: 15px; text-decoration: none; color: #6c757d; font-size: 0.9em;">
+        <a href="/panel-chofer?id_chofer={{ id_chofer }}" style="display: block; margin-top: 15px; text-decoration: none; color: #6c757d; font-size: 0.9em;">
             Cancelar y Volver
         </a>
     </div>
