@@ -185,6 +185,80 @@ def panel_contactos(request: Request, id_chofer: int, db: Session = Depends(get_
         }
     )
 
+@app.get("/administracion/choferes")
+def choferes_registrados(request: Request, rol: str, db: Session = Depends(get_db)):
+    choferes_db = db.query(models.Usuarios, models.Choferes).join(
+        models.Choferes, models.Usuarios.id_usuario == models.Choferes.id_chofer
+    ).all()
+    
+    if not choferes_db:
+        choferes_db = 0
+    return templates.TemplateResponse(
+        request = request,
+        name = "choferes.html",
+        context = {
+            "choferes": choferes_db, 
+            "rol": rol
+        }
+    )
+
+@app.get("/administracion/pasajeros")
+def pasajeros_registrados(request: Request,rol:str, db: Session = Depends(get_db)):
+    pasajeros_db = db.query(models.Usuarios,models.Pasajeros).join(models.Usuarios,models.Usuarios.id_usuario == models.Pasajeros.id_pasajero).all()
+
+    if not pasajeros_db:
+        pasajeros_db = 0
+    return templates.TemplateResponse(
+        request = request,
+        name = "pasajeros.html",
+        context = {
+            "pasajeros":pasajeros_db,
+            "rol":rol
+        }
+    )
+
+@app.post("/administracion/administradores/agregar")
+def agregar_administrador(
+    nombre: str = Form(...),
+    apellido: str = Form(...),
+    direccion: str = Form(...),
+    cedula: int = Form(...),
+    rol: str = Form(...),
+    correo: str = Form(...),
+    password: str = Form(...),
+    rol_creador: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    rol = rol.lower().strip()
+    
+    usuario_existente = db.query(models.Usuarios).filter(
+        (models.Usuarios.cedula == cedula) | (models.Usuarios.correo == correo.lower().strip())
+    ).first()
+
+    if not usuario_existente:
+        nuevo_admin = models.Usuarios(
+            nombre = nombre.title().strip(),
+            apellido = apellido.title().strip(),
+            cedula = cedula,
+            correo = correo.lower().strip(),
+            password = password.strip(),
+            rol = rol,
+            direccion = direccion.strip()
+        )
+        db.add(nuevo_admin)
+        db.commit()
+        
+    url_destino = f"/panel-administracion?rol={rol_creador}"
+    return RedirectResponse(url = url_destino, status_code=303)
+
+@app.get("/administracion/administradores")
+def registrar_administrador(request: Request, rol: str):
+    return templates.TemplateResponse(
+        request = request,
+        name = "administrador.html",
+        context= {"rol":rol}
+    )
+
 @app.post("/chofer/registrar-contacto")
 def registrar_contacto(
     id_chofer: int = Form(...),
@@ -212,8 +286,6 @@ def registrar_contacto(
     url_destino = f"/panel-chofer?id_chofer={id_chofer}"
     return RedirectResponse(url=url_destino, status_code=303)
     
-
-
 @app.post("/chofer/registrar-datos")
 def registrar_datos(
     id_chofer: int = Form(...),

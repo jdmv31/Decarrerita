@@ -11,12 +11,13 @@
                 {% if rol == 'superadmin' %}
                     <a href="/administracion/ganancias"><button>Ganancias Obtenidas</button></a>
                     <a href ="/administracion/pagos"><button>Pagos Cancelados</button></a>
-                    <a href ="/administracion/super-administradores"><button>Agregar Personal Administrativo</button></a>
                 {% endif %}
                 <a href="/administracion/evaluacion"><button>Evaluaciones Psicologicas</button></a>
                 <a href ="/administracion/revision"><button>Revisiones Vehiculares</button></a>
                 <a href ="/administracion/cancelar-pagos"><button>Cancelar Pagos</button></a>   
-                <a href ="/administracion/administradores"><button>Agregar Administradores</button></a>
+                <a href ="/administracion/administradores?rol={{ rol }}"><button>Agregar Administradores</button></a>
+                <a href ="/administracion/choferes?rol={{rol}}"><button>Visualizar Choferes Registrados</button></a>
+                <a href ="/administracion/pasajeros?rol={{rol}}"><button>Visualizar Pasajeros Registrados</button></a>
             </div>
 
             <a href="/" style="display: block; margin-top: 20px; text-decoration: none; color: #dc3545; font-size: 0.9em;">
