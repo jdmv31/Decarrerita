@@ -144,24 +144,46 @@ def recargar_saldo(request: Request, id_pasajero: int):
         context = {"id_pasajero":id_pasajero}
     )
 
-@app.get("/pasajero/saldo")
-def panel_saldo(request:Request, id_pasajero: int):
+@app.get("/pasajero/saldo/historial")
+def ver_historial(request: Request, id_pasajero: int, db: Session = Depends(get_db)):
+    recargas_db = db.query(models.HistorialRecargas, models.Banco).join(models.Banco, models.HistorialRecargas.id_banco == models.Banco.id_banco).filter(
+        models.HistorialRecargas.id_pasajero == id_pasajero).order_by(models.HistorialRecargas.fecha.desc()).all()
     return templates.TemplateResponse(
         request = request,
-        name = "panel_saldo.html",
+        name = "historial_recargas.html",
         context = {
-            "id_pasajero":id_pasajero
+            "id_pasajero": id_pasajero,
+            "recargas": recargas_db
         }
     )
 
-
 @app.get("/panel-pasajero")
-def panel_pasajeros(request:Request, id_pasajero: int):
+def panel_pasajeros(request: Request, id_pasajero: int, db: Session = Depends(get_db)):
+    pasajero_db = db.query(models.Pasajeros).filter(models.Pasajeros.id_pasajero == id_pasajero).first()
+    saldo = pasajero_db.saldo_disponible if pasajero_db and pasajero_db.saldo_disponible else 0.0
+    calificacion = pasajero_db.calificacion if pasajero_db and pasajero_db.calificacion else 0.0
+
     return templates.TemplateResponse(
         request = request,
         name = "panel_pasajero.html",
         context = {
-        "id_pasajero":id_pasajero
+            "id_pasajero": id_pasajero,
+            "saldo": saldo,
+            "calificacion": calificacion
+        }
+    )
+
+@app.get("/pasajero/saldo")
+def panel_saldo(request: Request, id_pasajero: int, db: Session = Depends(get_db)):
+    pasajero_db = db.query(models.Pasajeros).filter(models.Pasajeros.id_pasajero == id_pasajero).first()
+    saldo = pasajero_db.saldo_disponible if pasajero_db and pasajero_db.saldo_disponible else 0.0
+
+    return templates.TemplateResponse(
+        request = request,
+        name = "panel_saldo.html",
+        context = {
+            "id_pasajero": id_pasajero,
+            "saldo": saldo
         }
     )
 
