@@ -66,9 +66,10 @@ class HistorialRecargas(Base):
     id_historial = Column(Integer,primary_key = True)
     id_pasajero = Column(Integer,ForeignKey("pasajeros.id_pasajero"))
     id_banco = Column(Integer,ForeignKey("banco.id_banco"))
-    fecha = Column(Date, nullable = False)
-    numero_referencia = Column(Integer, unique = True)
+    fecha = Column(Date, server_default = func.current_date())
+    numero_referencia = Column(String, unique = True)
     monto_recargado = Column(Float, nullable = False)
+    numero_cuenta = Column(String,nullable = False)
 
 class Viajes (Base):
     __tablename__ = "viajes"
@@ -83,6 +84,8 @@ class Viajes (Base):
     fecha_viaje = Column(Date, nullable = False)
     estado_viaje = Column(Enum(EstadoViaje), nullable = False, default = EstadoViaje.EN_ESPERA)
     costo_viaje = Column(Float, nullable = False)
+    puntuacion_chofer = Column(Integer, nullable=True)
+    puntuacion_pasajero = Column(Integer, nullable=True)
 
 
 class EvaluacionChofer(Base):

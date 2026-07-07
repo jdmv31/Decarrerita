@@ -1,11 +1,25 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Pasajeros</title>
-</head>
-<body>
-    
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block title %}Decarrerita - Panel Cliente{% endblock %}
+
+{% block content %}
+    <div class="contenedor" style="width: 350px;">
+        <h1>Panel Pasajero</h1>
+        <div style="background-color: #d4edda; color: #155724; padding: 15px; border-radius: 5px; margin-bottom: 20px; font-size: 0.95em; text-align: left; border: 1px solid #c3e6cb;">
+            <p style="margin: 0 0 5px 0;"><strong>Saldo Disponible:</strong> <span style="font-size: 1.1em;">${{ saldo }}</span></p>
+            <p style="margin: 0;"><strong>Tu Calificación:</strong> {{ calificacion }} / 5.0</p>
+        </div>
+        
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+            <input type="hidden" name="id_pasajero" value="{{ id_pasajero }}">
+            <a href="/pasajero/solicitar-viaje?id_pasajero={{ id_pasajero }}"><button style="width: 100%;">Solicitar Viaje</button></a>
+            <a href="/pasajero/perfil?id_pasajero={{ id_pasajero }}"><button style="width: 100%;">Mis Datos Personales</button></a>
+            <a href="/pasajero/historial?id_pasajero={{ id_pasajero }}"><button style="width: 100%;">Historial de Viajes</button></a>
+            <a href="/pasajero/saldo?id_pasajero={{ id_pasajero }}"><button style="width: 100%;">Gestionar Saldo</button></a>
+        </div>
+
+        <a href="/" style="display: block; margin-top: 25px; text-decoration: none; color: #dc3545; font-size: 0.9em; font-weight: bold;">
+            Cerrar Sesión
+        </a>
+    </div>
+{% endblock %}

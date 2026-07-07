@@ -6,6 +6,8 @@ from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 from database import engine, SessionLocal
 import models
+import random
+from datetime import datetime
 
 app = FastAPI(title="API")
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -83,16 +85,103 @@ def iniciar_sesion(
     elif usuario_db.rol.lower() == "chofer":
         url_destino = f"/panel-chofer?id_chofer={usuario_db.id_usuario}"
         return RedirectResponse(url=url_destino, status_code=303)   
-    elif usuario_db.rol.lower() == "pasajero":
-        url_destino = f"/panel-cliente?id_pasajero={usuario_db.id_usuario}"
+    elif usuario_db.rol.lower() == "cliente":
+        url_destino = f"/panel-pasajero?id_pasajero={usuario_db.id_usuario}"
         return RedirectResponse(url=url_destino, status_code=303)
         
     elif usuario_db.rol.lower() == "superadmin":
         url_destino = f"/panel-administracion?rol={usuario_db.rol}"
         return RedirectResponse(url=url_destino, status_code=303)
+
+def generar_referencia():
+    tiempo = datetime.now().strftime("%Y%m%d%H%M%S")
+    numero = random.randint(1000,9999)
+    return f"{tiempo}{numero}"
+
+@app.post("/pasajero/saldo/procesar-recarga")
+def recarga(
+    id_pasajero: int = Form(...),
+    banco: str = Form(...),
+    nro_cuenta: str = Form(...),
+    monto: float = Form(...),
+    db: Session = Depends(get_db)
+):
+    numero_referencia = generar_referencia()
+    banco_db = db.query(models.Banco).filter(models.Banco.nombre == banco).first()
     
+    if not banco_db:
+        nuevo_banco = models.Banco(nombre = banco)
+        db.add(nuevo_banco)
+        db.commit()
+        db.refresh(nuevo_banco)
+        id_banco = nuevo_banco.id_banco
+    else:
+        id_banco = banco_db.id_banco
+
+    nueva_recarga = models.HistorialRecargas(
+        id_pasajero = id_pasajero,
+        id_banco = id_banco,
+        numero_cuenta = nro_cuenta,
+        monto_recargado = monto,
+        numero_referencia = numero_referencia
+    )
+
+    db.add(nueva_recarga)
+    pasajero_db = db.query(models.Pasajeros).filter(models.Pasajeros.id_pasajero == id_pasajero).first()
+    if pasajero_db:
+        saldo_actual = pasajero_db.saldo_disponible if pasajero_db.saldo_disponible is not None else 0.0
+        pasajero_db.saldo_disponible = saldo_actual + monto
+    db.commit()
+
+    url_destino = f"/pasajero/saldo?id_pasajero={id_pasajero}"
+    return RedirectResponse(url=url_destino, status_code=303)
+
+@app.get ("/pasajero/saldo/recargar")
+def recargar_saldo(request: Request, id_pasajero: int):
+    return templates.TemplateResponse(
+        request = request,
+        name = "recarga_saldo.html",
+        context = {"id_pasajero":id_pasajero}
+    )
+
+@app.get("/pasajero/saldo")
+def panel_saldo(request:Request, id_pasajero: int):
+    return templates.TemplateResponse(
+        request = request,
+        name = "panel_saldo.html",
+        context = {
+            "id_pasajero":id_pasajero
+        }
+    )
+
+
+@app.get("/panel-pasajero")
+def panel_pasajeros(request:Request, id_pasajero: int):
+    return templates.TemplateResponse(
+        request = request,
+        name = "panel_pasajero.html",
+        context = {
+        "id_pasajero":id_pasajero
+        }
+    )
+
+@app.get("/pasajero/perfil")
+def perfil_pasajero(request:Request, id_pasajero: int, db: Session = Depends(get_db)):
+    usuario_db = db.query(models.Usuarios).filter(models.Usuarios.id_usuario == id_pasajero).first()
+    pasajero_db = db.query(models.Pasajeros).filter(models.Pasajeros.id_pasajero == id_pasajero).first()
+
+    return templates.TemplateResponse(
+        request = request,
+        name = "informacion_pasajero.html",
+        context = {
+            "pasajero":pasajero_db,
+            "usuario":usuario_db,
+            "id_pasajero":id_pasajero
+        }
+    )
+
 @app.get("/panel-administracion")
-def panel_administracion(request: Request,rol: str):
+def panel_administracion(request: Request, rol: str):
     return templates.TemplateResponse(
         request = request,
         name = "panel_administracion.html",

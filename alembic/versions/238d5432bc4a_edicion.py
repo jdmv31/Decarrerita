@@ -1,8 +1,9 @@
-"""reestructuracion_contactos
+"""edicion:
 
-Revision ID: 6cd26fe7249b
+
+Revision ID: 238d5432bc4a
 Revises: 
-Create Date: 2026-07-01 16:15:37.043053
+Create Date: 2026-07-07 15:38:27.583121
 
 """
 from typing import Sequence, Union
@@ -12,7 +13,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '6cd26fe7249b'
+revision: str = '238d5432bc4a'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -90,9 +91,10 @@ def upgrade() -> None:
     sa.Column('id_historial', sa.Integer(), nullable=False),
     sa.Column('id_pasajero', sa.Integer(), nullable=True),
     sa.Column('id_banco', sa.Integer(), nullable=True),
-    sa.Column('fecha', sa.Date(), nullable=False),
-    sa.Column('numero_referencia', sa.Integer(), nullable=True),
+    sa.Column('fecha', sa.Date(), server_default=sa.text('CURRENT_DATE'), nullable=True),
+    sa.Column('numero_referencia', sa.String(), nullable=True),
     sa.Column('monto_recargado', sa.Float(), nullable=False),
+    sa.Column('numero_cuenta', sa.String(), nullable=False),
     sa.ForeignKeyConstraint(['id_banco'], ['banco.id_banco'], ),
     sa.ForeignKeyConstraint(['id_pasajero'], ['pasajeros.id_pasajero'], ),
     sa.PrimaryKeyConstraint('id_historial'),
@@ -130,6 +132,8 @@ def upgrade() -> None:
     sa.Column('fecha_viaje', sa.Date(), nullable=False),
     sa.Column('estado_viaje', sa.Enum('CANCELADO', 'PAGO', 'EN_ESPERA', name='estadoviaje'), nullable=False),
     sa.Column('costo_viaje', sa.Float(), nullable=False),
+    sa.Column('puntuacion_chofer', sa.Integer(), nullable=True),
+    sa.Column('puntuacion_pasajero', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['id_chofer'], ['choferes.id_chofer'], ),
     sa.ForeignKeyConstraint(['id_pasajero'], ['pasajeros.id_pasajero'], ),
     sa.ForeignKeyConstraint(['id_vehiculo'], ['vehiculos.matricula'], ),
