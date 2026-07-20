@@ -5,24 +5,9 @@
 {% block content %}
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
-    
-    <style>
-        #mi_mapa { 
-             height: 450px; 
-             width: 100%; 
-             border: 2px solid #ccc; 
-             border-radius: 8px; 
-             margin-bottom: 20px;
-        }
-        #btn_solicitar:disabled {
-            background-color: #6c757d;
-            cursor: not-allowed;
-            opacity: 0.6;
-        }
-    </style>
 
-    <div class="contenedor" style="width: 700px; max-width: 95vw;">
-        <h1>Solicitar un Viaje</h1>
+    <div class="contenedor" style="width: 900px; max-width: 95vw;">
+        <h1 style="color: #052659;">Solicitar un Viaje</h1>
 
         {% if error %}
             <div style="background-color: #f8d7da; color: #721c24; padding: 15px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #f5c6cb; text-align: left;">
@@ -42,13 +27,42 @@
             </div>
         {% endif %}
 
-        <p style="color: #555; margin-bottom: 15px;" id="instrucciones">
-            Buscando tu ubicacion...
+        <p style="color: #666; margin-bottom: 15px; font-weight: 500;" id="instrucciones">
+            Buscando tu ubicación actual...
         </p>
-        
-        <div id="mi_mapa"></div>
 
-        <form action="/pasajero/confirmar-viaje" method="POST" onsubmit="mostrarCarga()">
+        <!-- Contenedor dividido: Mapa + Resumen -->
+        <div class="layout-viaje">
+            <div id="mi_mapa"></div>
+
+            <div class="panel-resumen" id="recuadro_info">
+                <h3 style="margin-top: 0; margin-bottom: 5px; color: #052659; font-size: 1.4em;">Resumen de Ruta</h3>
+                <p style="font-size: 0.9em; color: #777; margin-top: 0;">Revisa los detalles antes de pedir el auto.</p>
+                
+                <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
+
+                <p><strong>Distancia:</strong> <span id="val_distancia">0</span> km</p>
+                <p><strong>Tiempo estimado:</strong> <span id="val_tiempo">0</span> min</p>
+                
+                <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
+                
+                <p style="font-size: 1.6em; font-weight: bold; color: #28a745; margin-bottom: 25px; text-align: center;">
+                    Total: $<span id="val_monto">0.00</span>
+                </p>
+
+                {% if saldo_actual > 0 %}
+                    <button type="button" id="btn_confirmar" onclick="document.getElementById('form_viaje').submit()" 
+                            style="width: 100%; padding: 15px; background-color: #052659; color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 1.1em; cursor: pointer; transition: 0.2s;">
+                        Confirmar Viaje
+                    </button>
+                {% else %}
+                    <button type="button" disabled style="width: 100%; padding: 15px; background-color: #ccc; color: #666; border: none; border-radius: 8px; font-weight: bold; font-size: 1.1em; cursor: not-allowed;">
+                        Sin saldo suficiente
+                    </button>
+                {% endif %}
+            </div>
+        </div>
+        <form id="form_viaje" action="/pasajero/confirmar-viaje" method="POST" onsubmit="mostrarCarga()" style="display: none;">
             <input type="hidden" name="id_pasajero" value="{{ id_pasajero }}">
             <input type="hidden" name="lat_origen" id="lat_origen">
             <input type="hidden" name="lng_origen" id="lng_origen">
@@ -56,33 +70,24 @@
             <input type="hidden" name="lng_destino" id="lng_destino">
             <input type="hidden" name="distancia_km" id="distancia_km">
             <input type="hidden" name="tiempo_minutos" id="tiempo_minutos">
-            
-            {% if saldo_actual > 0 %}
-                <button type="submit" id="btn_solicitar" disabled style="width: 100%; padding: 15px; background-color: #28a745; color: white; border: none; border-radius: 4px; font-weight: bold; font-size: 1.1em; transition: 0.3s;">
-                    Confirmar y Pedir Viaje
-                </button>
-            {% else %}
-                <button type="button" disabled style="width: 100%; padding: 15px; background-color: #ccc; color: #666; border: none; border-radius: 4px; font-weight: bold; font-size: 1.1em; cursor: not-allowed;">
-                    Recarga saldo para continuar
-                </button>
-            {% endif %}
         </form>
 
-        <a href="/panel-pasajero?id_pasajero={{ id_pasajero }}" style="display: block; margin-top: 20px; text-decoration: none; color: #dc3545; font-weight: bold;">
+        <a href="/panel-pasajero?id_pasajero={{ id_pasajero }}" style="display: block; margin-top: 25px; text-decoration: none; color: #dc3545; font-weight: bold;">
             Volver al Panel Principal
         </a>
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
-    <script src="{{ url_for('static', path='js/mapa.js') }}?v=1"></script>
+    <script src="{{ url_for('static', path='js/mapa.js') }}?v=2"></script>
     
     <script>
         function mostrarCarga() {
-            const btn = document.getElementById('btn_solicitar');
-            btn.innerText = "Buscando chofer disponible...";
+            const btn = document.getElementById('btn_confirmar');
+            btn.innerText = "Buscando chofer...";
             btn.style.backgroundColor = "#ffc107";
             btn.style.color = "black";
+            btn.style.cursor = "wait";
         }
     </script>
 {% endblock %}

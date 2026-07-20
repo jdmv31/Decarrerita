@@ -8,6 +8,7 @@ from database import engine, SessionLocal
 import models
 import random
 from datetime import datetime,time
+from fastapi.responses import JSONResponse
 
 app = FastAPI(title="API")
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -95,19 +96,14 @@ def iniciar_sesion(
         url_destino = f"/panel-administracion?rol={usuario_db.rol}"
         return RedirectResponse(url=url_destino, status_code=303)
 
-def generar_referencia():
-    tiempo = datetime.now().strftime("%Y%m%d%H%M%S")
-    numero = random.randint(1000,9999)
-    return f"{tiempo}{numero}"
-
 @app.post("/pasajero/saldo/procesar-recarga")
 def recarga(
     id_pasajero: int = Form(...),
     banco: str = Form(...),
     monto: float = Form(...),
+    numero_referencia: str = Form(...),
     db: Session = Depends(get_db)
 ):
-    numero_referencia = generar_referencia()
     banco_db = db.query(models.Banco).filter(models.Banco.nombre == banco).first()
     
     if not banco_db:
@@ -123,7 +119,7 @@ def recarga(
         id_pasajero = id_pasajero,
         id_banco = id_banco,
         monto_recargado = monto,
-        numero_referencia = numero_referencia
+        numero_referencia = numero_referencia.strip()
     )
 
     db.add(nueva_recarga)
@@ -170,7 +166,65 @@ def obtener_multiplicador_horario():
         return 1.2 
     else:
         return 1.0
+    
+def calcular_costo_viaje(distancia_km: float, tiempo_minutos: float) -> float:
+    """Función central para calcular el costo de cualquier viaje."""
+    tarifa_base = 1.00
+    tarifa_minima = 2.50
+    precio_por_km = 0.50
+    precio_por_min = 0.15
 
+    multiplicador_tiempo = obtener_multiplicador_horario()
+    costo_calculado = tarifa_base + (distancia_km * precio_por_km) + (tiempo_minutos * (precio_por_min * multiplicador_tiempo))
+    
+    return round(max(costo_calculado, tarifa_minima), 2)
+
+@app.get("/chofer/aceptar-viaje")
+def pantalla_aceptar_viaje(request: Request, id_chofer: int, id_viaje: int, db: Session = Depends(get_db)):
+    viaje_db = db.query(models.Viajes).filter(models.Viajes.id_viaje == id_viaje).first()
+
+    if not viaje_db:
+        return RedirectResponse(url=f"/panel-chofer?id_chofer={id_chofer}", status_code=303)
+    
+    pasajero_usuario = db.query(models.Usuarios).filter(models.Usuarios.id_usuario == viaje_db.id_pasajero).first()
+    pasajero_perfil = db.query(models.Pasajeros).filter(models.Pasajeros.id_pasajero == viaje_db.id_pasajero).first()
+
+    nombre_completo = f"{pasajero_usuario.nombre} {pasajero_usuario.apellido}" if pasajero_usuario else "Pasajero Desconocido"
+    calificacion = pasajero_perfil.calificacion if pasajero_perfil else 0.0
+
+    return templates.TemplateResponse(
+        request=request,
+        name="aceptar_viaje.html",
+        context={
+            "id_chofer": id_chofer,
+            "viaje": viaje_db,
+            "nombre_pasajero": nombre_completo,
+            "calificacion_pasajero": calificacion
+        }
+    )
+
+@app.post("/chofer/procesar-viaje")
+def procesar_viaje(
+    id_chofer: int = Form(...),
+    id_viaje: int = Form(...),
+    decision: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    viaje_db = db.query(models.Viajes).filter(models.Viajes.id_viaje == id_viaje).first()
+    chofer_db = db.query(models.Choferes).filter(models.Choferes.id_chofer == id_chofer).first()
+
+    if decision == "aceptar":
+        viaje_db.estado_viaje = models.EstadoViaje.PAGO # O un nuevo estado "EN_CURSO"
+        chofer_db.estado_chofer = models.EstadoChofer.EN_VIAJE
+    
+        db.commit()
+        return RedirectResponse(url=f"/chofer/viaje-actual?id_chofer={id_chofer}&id_viaje={id_viaje}", status_code=303)
+    else:
+        viaje_db.estado_viaje = models.EstadoViaje.CANCELADO
+        chofer_db.estado_chofer = models.EstadoChofer.DISPONIBLE 
+
+    db.commit()
+    return RedirectResponse(url=f"/panel-chofer?id_chofer={id_chofer}", status_code=303)
 
 @app.post("/pasajero/confirmar-viaje")
 def confirmar_viaje(
@@ -184,6 +238,9 @@ def confirmar_viaje(
     lng_destino: str = Form(...),
     db: Session = Depends(get_db)
 ):
+    pasajero_db = db.query(models.Pasajeros).filter(models.Pasajeros.id_pasajero == id_pasajero).first()
+    saldo_actual = pasajero_db.saldo_disponible if pasajero_db and pasajero_db.saldo_disponible else 0.0
+
     choferes_disponibles = db.query(models.Choferes).filter(
         models.Choferes.estado_chofer == models.EstadoChofer.DISPONIBLE
     ).all()
@@ -194,6 +251,7 @@ def confirmar_viaje(
             name="solicitar_viaje.html",
             context={
                 "id_pasajero": id_pasajero,
+                "saldo_actual": saldo_actual,
                 "error": True
             }
         )
@@ -207,30 +265,18 @@ def confirmar_viaje(
         ).first()
         matricula_vehiculo = vehiculo.matricula if vehiculo else "SIN-PLACA"
 
+    costo_total = calcular_costo_viaje(distancia_km, tiempo_minutos)
 
-    pasajero_db = db.query(models.Pasajeros).filter(models.Pasajeros.id_pasajero == id_pasajero).first()
-    
-    if not pasajero_db or pasajero_db.saldo_disponible <= 0:
+    if saldo_actual < costo_total:
         return templates.TemplateResponse(
             request=request,
             name="solicitar_viaje.html",
             context={
                 "id_pasajero": id_pasajero,
-                "saldo_actual": 0.0,
+                "saldo_actual": saldo_actual,
                 "error_saldo": True
             }
         )
-
-    tarifa_por_km = 0.50
-    tarifa_base = 1.00
-    tarifa_minima = 2.50 
-    precio_min = 0.15
-    multiplicador_tiempo = obtener_multiplicador_horario()
-    costo_calculado = tarifa_base + (distancia_km * tarifa_por_km) + (tiempo_minutos * (precio_min * multiplicador_tiempo))
-
-
-    costo_final = max(costo_calculado, tarifa_minima)
-    costo_total = round(costo_final, 2)
 
     nuevo_viaje = models.Viajes(
         id_vehiculo=matricula_vehiculo,
@@ -245,13 +291,66 @@ def confirmar_viaje(
         costo_viaje=costo_total
     )
     
-    chofer_asignado.estado_chofer = models.EstadoChofer.EN_VIAJE
-
     db.add(nuevo_viaje)
     db.commit()
+    db.refresh(nuevo_viaje) 
 
-    url_destino = f"/panel-pasajero?id_pasajero={id_pasajero}"
+    url_destino = f"/pasajero/viaje-actual?id_pasajero={id_pasajero}&id_viaje={nuevo_viaje.id_viaje}"
     return RedirectResponse(url=url_destino, status_code=303)
+
+@app.get("/pasajero/viaje-actual")
+def pasajero_viaje_actual(request: Request, id_pasajero: int, id_viaje: int, db: Session = Depends(get_db)):
+    viaje_db = db.query(models.Viajes).filter(models.Viajes.id_viaje == id_viaje).first()
+    chofer_db = db.query(models.Usuarios).filter(models.Usuarios.id_usuario == viaje_db.id_chofer).first()
+    vehiculo_db = db.query(models.Vehiculos).filter(models.Vehiculos.matricula == viaje_db.id_vehiculo).first()
+    
+    return templates.TemplateResponse(
+        request=request,
+        name="viaje_pasajero.html",
+        context={
+            "id_pasajero": id_pasajero, 
+            "viaje": viaje_db, 
+            "chofer": chofer_db, 
+            "vehiculo": vehiculo_db
+        }
+    )
+
+@app.get("/chofer/viaje-actual")
+def chofer_viaje_actual(request: Request, id_chofer: int, id_viaje: int, db: Session = Depends(get_db)):
+    viaje_db = db.query(models.Viajes).filter(models.Viajes.id_viaje == id_viaje).first()
+    pasajero_db = db.query(models.Usuarios).filter(models.Usuarios.id_usuario == viaje_db.id_pasajero).first()
+    perfil_pasajero = db.query(models.Pasajeros).filter(models.Pasajeros.id_pasajero == viaje_db.id_pasajero).first()
+    ganancia_chofer = round(viaje_db.costo_viaje * 0.70, 2)
+
+    return templates.TemplateResponse(
+        request=request,
+        name="viaje_chofer.html",
+        context={
+            "id_chofer": id_chofer, 
+            "viaje": viaje_db, 
+            "pasajero": pasajero_db, 
+            "perfil_pasajero": perfil_pasajero,
+            "ganancia": ganancia_chofer
+        }
+    )
+
+@app.post("/pasajero/cancelar-viaje")
+def cancelar_viaje_pasajero(
+    id_pasajero: int = Form(...), 
+    id_viaje: int = Form(...), 
+    db: Session = Depends(get_db)
+):
+    viaje_db = db.query(models.Viajes).filter(models.Viajes.id_viaje == id_viaje).first()
+    chofer_db = db.query(models.Choferes).filter(models.Choferes.id_chofer == viaje_db.id_chofer).first()
+    viaje_db.estado_viaje = models.EstadoViaje.CANCELADO
+    if chofer_db:
+        chofer_db.estado_chofer = models.EstadoChofer.DISPONIBLE
+        
+    db.commit()
+    
+    return RedirectResponse(url=f"/panel-pasajero?id_pasajero={id_pasajero}", status_code=303)
+
+
 
 @app.get("/pasajero/saldo/historial")
 def ver_historial(request: Request, id_pasajero: int, db: Session = Depends(get_db)):
@@ -516,6 +615,28 @@ def registrar_administrador(request: Request, rol: str):
         context= {"rol":rol}
     )
 
+@app.get("/api/calcular-tarifa")
+def api_calcular_tarifa(distancia_km: float, tiempo_minutos: float):
+    costo_final = calcular_costo_viaje(distancia_km, tiempo_minutos)
+    
+    return JSONResponse({"costo_total": costo_final})
+
+@app.get("/api/chofer/verificar-viaje/{id_chofer}")
+def verificar_viaje_pendiente(id_chofer: int, db: Session = Depends(get_db)):
+    """
+    Consultada cada 5s desde el panel del chofer (via base.html).
+    Devuelve si hay un viaje EN_ESPERA asignado a este chofer, y su id,
+    para poder redirigir a /chofer/aceptar-viaje.
+    """
+    viaje_db = db.query(models.Viajes).filter(
+        models.Viajes.id_chofer == id_chofer,
+        models.Viajes.estado_viaje == models.EstadoViaje.EN_ESPERA
+    ).order_by(models.Viajes.id_viaje.desc()).first()
+
+    if viaje_db:
+        return JSONResponse({"viaje_pendiente": True, "id_viaje": viaje_db.id_viaje})
+    return JSONResponse({"viaje_pendiente": False})
+
 @app.post("/chofer/registrar-contacto")
 def registrar_contacto(
     id_chofer: int = Form(...),
@@ -615,7 +736,7 @@ def actualizar_estado(
 ):
     chofer_db = db.query(models.Choferes).filter(models.Choferes.id_chofer == id_chofer).first()
     if chofer_db:
-        chofer_db.estado_chofer = estado_nuevo
+        chofer_db.estado_chofer = models.EstadoChofer[estado_nuevo]
         db.commit()
 
         if estado_nuevo == "DISPONIBLE" and matricula_activa:

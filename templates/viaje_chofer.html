@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Viaje en Curso - Decarrerita{% endblock %}
+
+{% block content %}
+<div class="contenedor" style="width: 500px; max-width: 95vw; text-align: center;">
+
+    {% if viaje.estado_viaje.name == "CANCELADO" %}
+        <div style="background-color: #f8d7da; color: #721c24; padding: 20px; border-radius: 8px; border: 1px solid #f5c6cb;">
+            <h2 style="margin-top: 0;">Viaje Cancelado</h2>
+            <p>El pasajero ha reportado un percance y ha cancelado el viaje. Ya te encuentras disponible nuevamente en el sistema.</p>
+        </div>
+        <a href="/panel-chofer?id_chofer={{ id_chofer }}">
+            <button style="width: 100%; margin-top: 25px; padding: 15px; background-color: #007bff; color: white; border: none; border-radius: 6px; font-size: 1.1em;">
+                Volver al Panel
+            </button>
+        </a>
+
+    {% elif viaje.estado_viaje.name == "PAGO" %}
+        <h2 style="color: #052659;">Viaje en Curso</h2>
+        <p style="color: #555;">Dirígete al punto de encuentro.</p>
+
+        <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; text-align: left; border: 1px solid #dee2e6; margin-bottom: 20px;">
+            <h3 style="margin-top: 0; color: #333; border-bottom: 1px solid #ccc; padding-bottom: 5px;">Datos del Pasajero</h3>
+            <p><strong>Nombre:</strong> {{ pasajero.nombre }} {{ pasajero.apellido }}</p>
+            <p><strong>Calificación:</strong> ⭐ {{ perfil_pasajero.calificacion }} / 5.0</p>
+            
+            <hr style="border: 0; border-top: 1px solid #ddd; margin: 15px 0;">
+            
+            <p><strong>Distancia:</strong> {{ viaje.distancia }} km</p>
+            <p><strong>Tiempo estimado:</strong> {{ viaje.duracion }} min</p>
+            <p><strong>Monto total cobrado al cliente:</strong> ${{ viaje.costo_viaje }}</p>
+        </div>
+
+        <div style="background-color: #d4edda; color: #155724; padding: 20px; border-radius: 8px; border: 1px solid #c3e6cb; margin-bottom: 25px;">
+            <p style="margin: 0; font-size: 0.9em;">Tu ganancia por este traslado (70%)</p>
+            <h1 style="margin: 5px 0 0 0;">${{ ganancia }}</h1>
+        </div>
+
+        <script>
+            setTimeout(() => window.location.reload(), 5000);
+        </script>
+    {% endif %}
+
+</div>
+{% endblock %}
