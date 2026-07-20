@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Choferes Registrados - Decarrerita{% endblock %}
+
+{% block content %}
+    <style>
+        .fila-interactiva {
+            transition: background-color 0.2s ease;
+        }
+        .fila-interactiva:hover {
+            background-color: #d1ecf1;
+        }
+    </style>
+
+    <div>
+        <h1>Choferes Registrados</h1>
+
+        {% if choferes == 0 %}
+            <div style="background-color: #f8f9fa; padding: 20px; border-radius: 5px; text-align: center; border: 1px solid #dee2e6; color: #6c757d;">
+                No hay choferes registrados en el sistema.
+            </div>
+        {% else %}
+            <table border="1" style="width: 100%; text-align: left; border-collapse: collapse;">
+                <thead>
+                    <tr style="background-color: #f2f2f2;">
+                        <th style="padding: 12px;">ID Chofer</th>
+                        <th style="padding: 12px;">Nombre Completo</th>
+                        <th style="padding: 12px;">C.I</th>
+                        <th style="padding: 12px;">Correo</th>
+                        <th style="padding: 12px;">Calificación</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for usuario, chofer in choferes %}
+                    <tr class="fila-interactiva">
+                        <td style="padding: 12px;">{{ chofer.id_chofer }}</td>
+                        <td style="padding: 12px;">{{ usuario.nombre }} {{ usuario.apellido }}</td>
+                        <td style="padding: 12px;">{{ usuario.cedula }}</td>
+                        <td style="padding: 12px;">{{ usuario.correo }}</td>
+                        <td style="padding: 12px;">{{ chofer.calificacion }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+
+        <a href="/panel-administracion?rol={{rol}}" style="display: block; margin-top: 25px; text-decoration: none; color: #dc3545; font-weight: bold;">
+            Volver al Panel Principal
+        </a>
+    </div>
+{% endblock %}

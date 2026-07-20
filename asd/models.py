@@ -69,6 +69,7 @@ class HistorialRecargas(Base):
     fecha = Column(Date, server_default = func.current_date())
     numero_referencia = Column(String, unique = True)
     monto_recargado = Column(Float, nullable = False)
+    numero_cuenta = Column(String,nullable = False)
 
 class Viajes (Base):
     __tablename__ = "viajes"

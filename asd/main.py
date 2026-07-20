@@ -104,6 +104,7 @@ def generar_referencia():
 def recarga(
     id_pasajero: int = Form(...),
     banco: str = Form(...),
+    nro_cuenta: str = Form(...),
     monto: float = Form(...),
     db: Session = Depends(get_db)
 ):
@@ -122,6 +123,7 @@ def recarga(
     nueva_recarga = models.HistorialRecargas(
         id_pasajero = id_pasajero,
         id_banco = id_banco,
+        numero_cuenta = nro_cuenta,
         monto_recargado = monto,
         numero_referencia = numero_referencia
     )
@@ -145,17 +147,11 @@ def recargar_saldo(request: Request, id_pasajero: int):
     )
 
 @app.get("/pasajero/solicitar-viaje")
-def solicitar_viaje(request: Request, id_pasajero: int, db: Session = Depends(get_db)):
-    pasajero_db = db.query(models.Pasajeros).filter(models.Pasajeros.id_pasajero == id_pasajero).first()
-    saldo = pasajero_db.saldo_disponible if pasajero_db and pasajero_db.saldo_disponible else 0.0
-
+def solicitar_viaje(request: Request, id_pasajero: int):
     return templates.TemplateResponse(
         request=request,
-        name="solicitar_viaje.html",
-        context={
-            "id_pasajero": id_pasajero,
-            "saldo_actual": saldo
-        }
+        name = "solicitar_viaje.html",
+        context={"id_pasajero":id_pasajero}
     )
 
 def obtener_multiplicador_horario():
@@ -201,25 +197,12 @@ def confirmar_viaje(
     chofer_asignado = random.choice(choferes_disponibles)
     matricula_vehiculo = vehiculos_activos_sesion.get(chofer_asignado.id_chofer)
 
+
     if not matricula_vehiculo:
         vehiculo = db.query(models.Vehiculos).filter(
             models.Vehiculos.id_chofer == chofer_asignado.id_chofer
         ).first()
         matricula_vehiculo = vehiculo.matricula if vehiculo else "SIN-PLACA"
-
-
-    pasajero_db = db.query(models.Pasajeros).filter(models.Pasajeros.id_pasajero == id_pasajero).first()
-    
-    if not pasajero_db or pasajero_db.saldo_disponible <= 0:
-        return templates.TemplateResponse(
-            request=request,
-            name="solicitar_viaje.html",
-            context={
-                "id_pasajero": id_pasajero,
-                "saldo_actual": 0.0,
-                "error_saldo": True
-            }
-        )
 
     tarifa_por_km = 0.50
     tarifa_base = 1.00

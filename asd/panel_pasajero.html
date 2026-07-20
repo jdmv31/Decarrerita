@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Decarrerita - Panel Cliente{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    
+    <aside class="panel-izquierdo">
+        <div class="perfil-header">
+            <div class="avatar-placeholder"><img src="{{ url_for('static', path='images/usuario.png') }}" alt="Foto de perfil"></div>
+            <h1>Mi Perfil</h1>
+        </div>
+        
+        <nav class="menu-lateral">
+            <a href="/pasajero/perfil?id_pasajero={{ id_pasajero }}" class="menu-item">Mis Datos Personales</a>
+            <a href="/pasajero/historial?id_pasajero={{ id_pasajero }}" class="menu-item">Historial de Viajes</a>
+            <a href="/pasajero/saldo?id_pasajero={{ id_pasajero }}" class="menu-item">Gestionar Saldo</a>
+        </nav>
+
+        <a href="/" class="btn-cerrar">Cerrar Sesión</a>
+    </aside>
+
+    <main class="panel-derecho">
+        
+        <header class="header-principal">
+            <h2>¡Bienvenido, {{ nombre }}!</h2>
+        </header>
+
+        <input type="hidden" name="id_pasajero" value="{{ id_pasajero }}">
+
+        <div class="grid-tarjetas">
+            <div class="tarjeta-dato saldo-card">
+                <h3>Saldo Disponible💲</h3>
+                <p class="valor">${{ saldo }}</p>
+            </div>
+            <div class="tarjeta-dato calificacion-card">
+                <h3>Tu Calificación ⭐</h3>
+                <p class="valor">{{ calificacion }} <span>/ 5.0</span></p>
+            </div>
+        </div>
+
+        <div class="banner-accion">
+            <div class="banner-texto">
+                <h3>¿A dónde vamos hoy?</h3>
+                <p>Pide tu taxi rápido y seguro con Decarrerita.</p>
+            </div>
+            <a href="/pasajero/solicitar-viaje?id_pasajero={{ id_pasajero }}" style="width: auto;">
+                <button class="btn-solicitar">Solicitar Viaje 🚕</button>
+            </a>
+        </div>
+
+    </main>
+
+</div>
+{% endblock %}

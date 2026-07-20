@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Revisiones Vehiculares - Decarrerita{% endblock %}
+
+{% block content %}
+    <style>
+        .fila-interactiva {
+            transition: background-color 0.2s ease;
+        }
+        .fila-interactiva:hover {
+            background-color: #d1ecf1;
+            cursor: pointer;
+        }
+    </style>
+
+    <div>
+        <h1>Revisiones Vehiculares por Aprobar</h1>
+        <p style="color: #555; margin-bottom: 20px;">Haz clic en cualquier vehículo para registrar la calificación de su revisión.</p>
+        
+        <table border="1" style="width: 100%; text-align: left; border-collapse: collapse;">
+            <thead>
+                <tr style="background-color: #f2f2f2;">
+                    <th style="padding: 12px;">ID Revisión</th>
+                    <th style="padding: 12px;">Matrícula</th>
+                    <th style="padding: 12px;">Marca y Modelo</th>
+                    <th style="padding: 12px;">Fecha de Solicitud</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for vehiculo, revision in revisiones %}
+                <tr class="fila-interactiva" onclick="abrirModalCalificacion('{{ revision.id_revision }}', '{{ vehiculo.marca }} {{ vehiculo.modelo }} ({{ vehiculo.matricula }})')">
+                    <td style="padding: 12px;">{{ revision.id_revision }}</td>
+                    <td style="padding: 12px;">{{ vehiculo.matricula }}</td>
+                    <td style="padding: 12px;">{{ vehiculo.marca }} {{ vehiculo.modelo }}</td>
+                    <td style="padding: 12px;">{{ revision.fecha_revision }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="4" style="padding: 15px; text-align: center; color: #6c757d;">
+                        No hay vehículos pendientes por revisión.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <a href="/panel-administracion?rol=superadmin" style="display: block; margin-top: 25px; text-decoration: none; color: #dc3545; font-weight: bold;">
+            Volver al Panel Principal
+        </a>
+    </div>
+
+    <div id="modalCalificacion" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 1000;">
+        <div style="background: white; padding: 30px; border-radius: 8px; width: 350px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+            <h3 style="margin-top: 0; color: #333; text-align: center;">Calificar Vehículo</h3>
+            
+            <p style="text-align: center; color: #0056b3; font-weight: bold;" id="nombreVehiculoModal"></p>
+            
+            <form action="/administracion/revision/guardar" method="POST">
+                <input type="hidden" name="id_revision" id="idRevisionModal" value="">
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 5px; color: #555;">Puntuación de la revisión (1-100):</label>
+                    <input type="number" step="any" name="puntuacion" min="1" max="100" placeholder="Ej. 85.5" required style="width: 100%; padding: 10px; border-radius: 4px; border: 1px solid #ccc; font-size: 16px;">
+                </div>
+                
+                <button type="submit" style="width: 100%; padding: 10px; background-color: #28a745; color: white; border: none; border-radius: 4px; font-weight: bold; margin-bottom: 10px; cursor: pointer;">
+                    Guardar Calificación
+                </button>
+                <button type="button" onclick="cerrarModal()" style="width: 100%; padding: 10px; background-color: #dc3545; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
+                    Cancelar
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function abrirModalCalificacion(idRev, infoVehiculo) {
+            document.getElementById('idRevisionModal').value = idRev;
+            document.getElementById('nombreVehiculoModal').innerText = infoVehiculo;
+            document.getElementById('modalCalificacion').style.display = 'flex';
+        }
+
+        function cerrarModal() {
+            document.getElementById('modalCalificacion').style.display = 'none';
+            document.getElementById('idRevisionModal').value = '';
+            document.getElementById('nombreVehiculoModal').innerText = '';
+        }
+    </script>
+{% endblock %}

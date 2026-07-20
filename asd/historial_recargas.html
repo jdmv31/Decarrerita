@@ -27,6 +27,7 @@
                         <tr style="background-color: #f2f2f2; border-bottom: 2px solid #ccc;">
                             <th style="padding: 12px;">Fecha</th>
                             <th style="padding: 12px;">Banco Origen</th>
+                            <th style="padding: 12px;">Nro. Cuenta</th>
                             <th style="padding: 12px;">Referencia</th>
                             <th style="padding: 12px; text-align: right;">Monto</th>
                         </tr>
@@ -36,6 +37,7 @@
                         <tr class="fila-interactiva" style="border-bottom: 1px solid #eee;">
                             <td style="padding: 12px;">{{ recarga.fecha }}</td>
                             <td style="padding: 12px;">{{ banco.nombre }}</td>
+                            <td style="padding: 12px;">**** {{ recarga.numero_cuenta[-4:] }}</td>
                             <td style="padding: 12px;">{{ recarga.numero_referencia }}</td>
                             <td style="padding: 12px; text-align: right; font-weight: bold; color: #28a745;">
                                 +${{ recarga.monto_recargado }}
