@@ -251,6 +251,8 @@ def ver_historial(request: Request, id_pasajero: int, db: Session = Depends(get_
 
 @app.get("/panel-pasajero")
 def panel_pasajeros(request: Request, id_pasajero: int, db: Session = Depends(get_db)):
+    usuario_db = db.query(models.Usuarios).filter(models.Usuarios.id_usuario == id_pasajero).first()
+    nombre_usuario = usuario_db.nombre if usuario_db else "Pasajero"
     pasajero_db = db.query(models.Pasajeros).filter(models.Pasajeros.id_pasajero == id_pasajero).first()
     saldo = pasajero_db.saldo_disponible if pasajero_db and pasajero_db.saldo_disponible else 0.0
     calificacion = pasajero_db.calificacion if pasajero_db and pasajero_db.calificacion else 0.0
@@ -261,7 +263,8 @@ def panel_pasajeros(request: Request, id_pasajero: int, db: Session = Depends(ge
         context = {
             "id_pasajero": id_pasajero,
             "saldo": saldo,
-            "calificacion": calificacion
+            "calificacion": calificacion,
+            "nombre": nombre_usuario 
         }
     )
 

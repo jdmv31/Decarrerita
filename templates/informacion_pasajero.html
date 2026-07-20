@@ -1,33 +1,50 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Perfil - Decarrerita</title>
-    <link rel="stylesheet" href="{{ url_for('static', path='style.css') }}">
-</head>
-<body>
-    <div class="contenedor" style="width: 400px;">
-        <h1>Mi Perfil</h1>
-        <div style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: left; border: 1px solid #dee2e6;">
-            <h3 style="margin-top: 0; color: #333; border-bottom: 1px solid #ccc; padding-bottom: 5px;">Información Personal</h3>
-            <p><strong>Nombre:</strong> {{ usuario.nombre }} {{ usuario.apellido }}</p>
-            <p><strong>Cédula:</strong> {{ usuario.cedula }}</p>
-            <p><strong>Correo:</strong> {{ usuario.correo }}</p>
-            <p><strong>Dirección:</strong> {{ usuario.direccion }}</p>
+{% extends "base.html" %}
+
+{% block title %}Decarrerita - Mi Perfil{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    
+    <aside class="panel-izquierdo">
+        <div class="perfil-header">
+            <div class="avatar-placeholder">
+                <img src="{{ url_for('static', path='images/usuario.png') }}" alt="Foto de perfil">
+            </div>
+            <h1>Mi Perfil</h1>
+        </div>
+        
+        <nav class="menu-lateral">
+            <a href="/panel-pasajero?id_pasajero={{ id_pasajero }}" class="menu-item">← Volver al Panel</a>
+        </nav>
+    </aside>
+
+    <main class="panel-derecho">
+        
+        <header class="header-principal">
+            <h2>Tus Datos Personales {{ usuario.nombre }}</h2>
+        </header>
+
+        <div class="grid-tarjetas">
+            <div class="tarjeta-dato saldo-card">
+                <h3>Información Personal</h3>
+                <p><strong>Nombre:</strong> {{ usuario.nombre }} {{ usuario.apellido }}</p>
+                <p><strong>Cédula:</strong> {{ usuario.cedula }}</p>
+                <p><strong>Correo:</strong> {{ usuario.correo }}</p>
+                <p><strong>Dirección:</strong> {{ usuario.direccion }}</p>
+            </div>
+
+            <div class="tarjeta-dato calificacion-card">
+                <h3>Detalles de la Cuenta</h3>
+                
+                <p><strong>Calificación Promedio:</strong></p>
+                <p class="valor">{{ pasajero.calificacion }} <span>/ 5.0</span></p>
+                
+                <p><strong>Saldo Disponible:</strong></p>
+                <p class="valor">${{ pasajero.saldo_disponible }}</p>
+            </div>
         </div>
 
-        <div style="background-color: #e9ecef; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: left; border: 1px solid #ced4da;">
-            <h3 style="margin-top: 0; color: #333; border-bottom: 1px solid #ccc; padding-bottom: 5px;">Detalles de la Cuenta</h3>
-            
-            <p><strong>Calificación Promedio:</strong> {{ pasajero.calificacion }} / 5.0</p>
-            
-            <p><strong>Saldo Disponible:</strong> <span style="color: #28a745; font-weight: bold;">${{ pasajero.saldo_disponible }}</span></p>
-        </div>
+    </main>
 
-        <a href="/panel-pasajero?id_pasajero={{ id_pasajero }}" style="display: block; margin-top: 15px; text-decoration: none; color: #007bff; font-weight: bold;">
-            Volver al Panel Principal
-        </a>
-    </div>
-</body>
-</html>
+</div>
+{% endblock %}

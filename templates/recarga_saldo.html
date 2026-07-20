@@ -3,49 +3,74 @@
 {% block title %}Recargar Saldo - Decarrerita{% endblock %}
 
 {% block content %}
-    <div class="contenedor" style="width: 400px;">
-        <h1>Recargar Saldo</h1>
-        <p style="color: #555; margin-bottom: 20px;">Ingresa los datos de tu transferencia o pago móvil para procesar la recarga.</p>
+<div class="dashboard-container">
+    
+    <aside class="panel-izquierdo">
+        <div class="perfil-header">
+            <div class="avatar-placeholder">
+                <img src="{{ url_for('static', path='images/usuario.png') }}" alt="Foto de perfil">
+            </div>
+            <h1>Billetera</h1>
+        </div>
+        
+        <nav class="menu-lateral">
+            <a href="/pasajero/saldo?id_pasajero={{ id_pasajero }}" class="menu-item">← Volver a Saldo</a>
+            <a href="/panel-pasajero?id_pasajero={{ id_pasajero }}" class="menu-item">Ir al Panel Principal</a>
+        </nav>
+    </aside>
 
-        <div style="background-color: #f8f9fa; padding: 20px; border-radius: 5px; text-align: left; border: 1px solid #dee2e6;">
-            <form action="/pasajero/saldo/procesar-recarga" method="POST">
+    <main class="panel-derecho">
+        
+        <header class="header-principal">
+            <h2>Recargar Saldo</h2>
+            <p>Ingresa los datos de tu transferencia o pago móvil para procesar la recarga.</p>
+        </header>
+
+        <div class="tarjeta-formulario">
+            <form action="/pasajero/saldo/procesar-recarga" method="POST" class="formulario-estilizado">
                 
                 <input type="hidden" name="id_pasajero" value="{{ id_pasajero }}">
-                <label style="display: block; margin-bottom: 5px; font-size: 0.9em; color: #333;">Banco:</label>
-                <select name="banco" required style="width: 100%; padding: 10px; margin-bottom: 15px; border-radius: 4px; border: 1px solid #ccc; background-color: white; box-sizing: border-box;">
-                    <option value="" disabled selected>Seleccione su banco</option>
-                    <option value="Bancamiga">0172 - Bancamiga</option>
-                    <option value="Bancaribe">0114 - Bancaribe</option>
-                    <option value="Banco Activo">0171 - Banco Activo</option>
-                    <option value="Banco Agrícola de Venezuela">0166 - Banco Agrícola de Venezuela</option>
-                    <option value="Banco Bicentenario">0175 - Banco Bicentenario</option>
-                    <option value="Banco Caroní">0128 - Banco Caroní</option>
-                    <option value="Banco de Venezuela">0102 - Banco de Venezuela</option>
-                    <option value="Banco Venezolano de Crédito">0104 - Banco Venezolano de Crédito</option>
-                    <option value="Bancrecer">0168 - Bancrecer</option>
-                    <option value="Banesco">0134 - Banesco</option>
-                    <option value="Banco Nacional de Crédito">0191 - Banco Nacional de Crédito</option>
-                    <option value="Banco Plaza">0138 - Banco Plaza</option>
-                    <option value="Banco Provincial">0108 - Banco Provincial</option>
-                    <option value="Del Sur">0157 - Del Sur</option>
-                    <option value="Mercantil">0105 - Mercantil</option>
-                    <option value="Tesoro">0163 - Tesoro</option>
-                </select>
+                
+                <div class="grupo-input">
+                    <label>Banco Origen:</label>
+                    <select name="banco" required>
+                        <option value="" disabled selected>Seleccione su banco</option>
+                        <option value="Bancamiga">0172 - Bancamiga</option>
+                        <option value="Bancaribe">0114 - Bancaribe</option>
+                        <option value="Banco Activo">0171 - Banco Activo</option>
+                        <option value="Banco Agrícola de Venezuela">0166 - Banco Agrícola de Venezuela</option>
+                        <option value="Banco Bicentenario">0175 - Banco Bicentenario</option>
+                        <option value="Banco Caroní">0128 - Banco Caroní</option>
+                        <option value="Banco de Venezuela">0102 - Banco de Venezuela</option>
+                        <option value="Banco Venezolano de Crédito">0104 - Banco Venezolano de Crédito</option>
+                        <option value="Bancrecer">0168 - Bancrecer</option>
+                        <option value="Banesco">0134 - Banesco</option>
+                        <option value="Banco Nacional de Crédito">0191 - Banco Nacional de Crédito</option>
+                        <option value="Banco Plaza">0138 - Banco Plaza</option>
+                        <option value="Banco Provincial">0108 - Banco Provincial</option>
+                        <option value="Del Sur">0157 - Del Sur</option>
+                        <option value="Mercantil">0105 - Mercantil</option>
+                        <option value="Tesoro">0163 - Tesoro</option>
+                    </select>
+                </div>
 
-                <label style="display: block; margin-bottom: 5px; font-size: 0.9em; color: #333;">Número de Cuenta Origen:</label>
-                <input type="text" name="nro_cuenta" placeholder="Ej: 01340123456789012345" required minlength="20" maxlength="20" pattern="\d{20}" title="Debe contener exactamente 20 números sin espacios ni guiones" style="width: 100%; padding: 10px; margin-bottom: 15px; border-radius: 4px; border: 1px solid #ccc; box-sizing: border-box;">
+                <div class="grupo-input">
+                    <label>Número de Cuenta Origen:</label>
+                    <input type="text" name="nro_cuenta" placeholder="Ej: 01340123456789012345" required minlength="20" maxlength="20" pattern="\d{20}" title="Debe contener exactamente 20 números sin espacios ni guiones">
+                </div>
                 
-                <label style="display: block; margin-bottom: 5px; font-size: 0.9em; color: #333;">Monto a Recargar ($):</label>
-                <input type="number" name="monto" placeholder="Ej: 10.50" required min="1" step="0.01" style="width: 100%; padding: 10px; margin-bottom: 20px; border-radius: 4px; border: 1px solid #ccc; box-sizing: border-box;">
+                <div class="grupo-input">
+                    <label>Monto a Recargar ($):</label>
+                    <input type="number" name="monto" placeholder="Ej: 10.50" required min="1" step="0.01">
+                </div>
                 
-                <button type="submit" style="width: 100%; padding: 12px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 1em;">
+                <button type="submit" class="btn-principal btn-verde" style="margin-top: 15px;">
                     Registrar Pago
                 </button>
+                
             </form>
         </div>
 
-        <a href="/pasajero/saldo?id_pasajero={{ id_pasajero }}" style="display: block; margin-top: 20px; text-decoration: none; color: #dc3545; font-size: 0.9em; font-weight: bold;">
-            Cancelar y Volver
-        </a>
-    </div>
+    </main>
+</div>
 {% endblock %}
