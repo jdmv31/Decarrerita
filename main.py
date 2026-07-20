@@ -7,12 +7,14 @@ from sqlalchemy.orm import Session
 from database import engine, SessionLocal
 import models
 import random
-from datetime import datetime
+from datetime import datetime,time
 
 app = FastAPI(title="API")
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "static")), name="static")
 templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
+
+vehiculos_activos_sesion = {}
 
 def get_db():
     db = SessionLocal()
@@ -144,6 +146,96 @@ def recargar_saldo(request: Request, id_pasajero: int):
         context = {"id_pasajero":id_pasajero}
     )
 
+@app.get("/pasajero/solicitar-viaje")
+def solicitar_viaje(request: Request, id_pasajero: int):
+    return templates.TemplateResponse(
+        request=request,
+        name = "solicitar_viaje.html",
+        context={"id_pasajero":id_pasajero}
+    )
+
+def obtener_multiplicador_horario():
+    """
+    Devuelve un multiplicador basado en la hora actual del servidor.
+    """
+    hora_actual = datetime.now().time()
+    
+    if hora_actual >= time(0, 0) and hora_actual < time(6, 0):
+        return 1.5 
+    elif hora_actual >= time(20, 0):
+        return 1.2 
+    else:
+        return 1.0
+
+
+@app.post("/pasajero/confirmar-viaje")
+def confirmar_viaje(
+    request: Request,
+    id_pasajero: int = Form(...),
+    distancia_km: float = Form(...),
+    tiempo_minutos: float = Form(...),
+    lat_origen: str = Form(...),
+    lng_origen: str = Form(...),
+    lat_destino: str = Form(...),
+    lng_destino: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    choferes_disponibles = db.query(models.Choferes).filter(
+        models.Choferes.estado_chofer == models.EstadoChofer.DISPONIBLE
+    ).all()
+
+    if not choferes_disponibles:
+        return templates.TemplateResponse(
+            request=request,
+            name="solicitar_viaje.html",
+            context={
+                "id_pasajero": id_pasajero,
+                "error": True
+            }
+        )
+
+    chofer_asignado = random.choice(choferes_disponibles)
+    matricula_vehiculo = vehiculos_activos_sesion.get(chofer_asignado.id_chofer)
+
+
+    if not matricula_vehiculo:
+        vehiculo = db.query(models.Vehiculos).filter(
+            models.Vehiculos.id_chofer == chofer_asignado.id_chofer
+        ).first()
+        matricula_vehiculo = vehiculo.matricula if vehiculo else "SIN-PLACA"
+
+    tarifa_por_km = 0.50
+    tarifa_base = 1.00
+    tarifa_minima = 2.50 
+    precio_min = 0.15
+    multiplicador_tiempo = obtener_multiplicador_horario()
+    costo_calculado = tarifa_base + (distancia_km * tarifa_por_km) + (tiempo_minutos * (precio_min * multiplicador_tiempo))
+
+
+    costo_final = max(costo_calculado, tarifa_minima)
+    costo_total = round(costo_final, 2)
+
+    nuevo_viaje = models.Viajes(
+        id_vehiculo=matricula_vehiculo,
+        id_chofer=chofer_asignado.id_chofer,
+        id_pasajero=id_pasajero,
+        duracion=tiempo_minutos,
+        distancia=distancia_km,
+        lugar_inicio=f"{lat_origen}, {lng_origen}",
+        lugar_destino=f"{lat_destino}, {lng_destino}",
+        fecha_viaje=datetime.now().date(),
+        estado_viaje=models.EstadoViaje.EN_ESPERA,
+        costo_viaje=costo_total
+    )
+    
+    chofer_asignado.estado_chofer = models.EstadoChofer.EN_VIAJE
+
+    db.add(nuevo_viaje)
+    db.commit()
+
+    url_destino = f"/panel-pasajero?id_pasajero={id_pasajero}"
+    return RedirectResponse(url=url_destino, status_code=303)
+
 @app.get("/pasajero/saldo/historial")
 def ver_historial(request: Request, id_pasajero: int, db: Session = Depends(get_db)):
     recargas_db = db.query(models.HistorialRecargas, models.Banco).join(models.Banco, models.HistorialRecargas.id_banco == models.Banco.id_banco).filter(
@@ -235,19 +327,53 @@ def guardar_calificacion(
 
     return RedirectResponse(url="/administracion/evaluacion",status_code=303)
 
+@app.get("/administracion/revision")
+def revisiones_vehiculares(request: Request, db: Session = Depends(get_db)):
+    revisiones_db = db.query(models.Vehiculos, models.RevisionVehiculo).join(
+        models.RevisionVehiculo, models.Vehiculos.matricula == models.RevisionVehiculo.id_vehiculo
+    ).filter(models.RevisionVehiculo.puntuacion == 0.0).all()
+
+    return templates.TemplateResponse(
+        request = request,
+        name = "revisiones_vehiculares.html",
+        context = {"revisiones": revisiones_db}
+    )
+
+@app.post("/administracion/revision/guardar")
+def guardar_revision_vehiculo(
+    id_revision: int = Form(...),
+    puntuacion: float = Form(...),
+    db: Session = Depends(get_db)                   
+):
+    revision_db = db.query(models.RevisionVehiculo).filter(models.RevisionVehiculo.id_revision == id_revision).first()
+    if revision_db:
+        revision_db.puntuacion = puntuacion
+        revision_db.fecha_revision = datetime.now().date()
+        db.commit()
+
+    return RedirectResponse(url="/administracion/revision", status_code=303)
 
 @app.get ("/panel-chofer")
-def panel_chofer(request: Request,id_chofer: int, db: Session = Depends(get_db)):
+def panel_chofer(request: Request, id_chofer: int, db: Session = Depends(get_db)):
     evaluacion_db = db.query(models.EvaluacionChofer).filter(models.EvaluacionChofer.id_chofer == id_chofer).first()
-    if evaluacion_db is not None:
-        puntuacion = evaluacion_db.puntuacion
-    else:
-        puntuacion = 0 
+    puntuacion = evaluacion_db.puntuacion if evaluacion_db is not None else 0 
+    cantidad_contactos = db.query(models.AgendaContactos).filter(models.AgendaContactos.id_chofer == id_chofer).count()
+    vehiculos_aprobados = db.query(models.Vehiculos).join(
+        models.RevisionVehiculo, models.Vehiculos.matricula == models.RevisionVehiculo.id_vehiculo
+    ).filter(
+        models.Vehiculos.id_chofer == id_chofer,
+        models.RevisionVehiculo.puntuacion >= 65
+    ).all()
 
     return templates.TemplateResponse(
         request= request,
         name = "panel_chofer.html",
-        context={"puntuacion": puntuacion, "id_chofer": id_chofer} 
+        context={
+            "puntuacion": puntuacion, 
+            "id_chofer": id_chofer,
+            "vehiculos": vehiculos_aprobados,
+            "cantidad_contactos": cantidad_contactos
+        } 
     )
 
 @app.get ("/chofer/vehiculo")
@@ -422,6 +548,7 @@ def registrar_datos(
     url_destino = f"/panel-chofer?id_chofer={id_chofer}"
     return RedirectResponse(url=url_destino, status_code=303)
 
+
 @app.post ("/chofer/vehiculo")
 def registrar_vehiculo(
     placa: str = Form(...),
@@ -432,8 +559,10 @@ def registrar_vehiculo(
     id_chofer: int = Form(...),
     db: Session = Depends(get_db)
 ):
+    matricula_formateada = placa.upper().strip()
+    
     nuevo_vehiculo = models.Vehiculos(
-        matricula = placa.upper().strip(),
+        matricula = matricula_formateada,
         id_chofer = id_chofer,
         marca = marca.upper().strip(),
         modelo = modelo.title().strip(),
@@ -443,6 +572,17 @@ def registrar_vehiculo(
     db.add(nuevo_vehiculo)
     db.commit()
     db.refresh(nuevo_vehiculo)
+    
+    nueva_revision = db.query(models.RevisionVehiculo).filter(models.RevisionVehiculo.id_vehiculo == matricula_formateada).first()
+    if not nueva_revision:
+        nueva_revision = models.RevisionVehiculo(
+            id_vehiculo = matricula_formateada,
+            puntuacion = 0.0,
+            fecha_revision = datetime.now().date()
+        )
+        db.add(nueva_revision)
+        db.commit()
+
     url_destino = f"/panel-chofer?id_chofer={id_chofer}"
     return RedirectResponse(url=url_destino, status_code=303)
 
@@ -450,12 +590,17 @@ def registrar_vehiculo(
 def actualizar_estado(
     id_chofer: int = Form(...),
     estado_nuevo: str = Form(...),
+    matricula_activa: str = Form(None),
     db: Session = Depends(get_db)
 ):
     chofer_db = db.query(models.Choferes).filter(models.Choferes.id_chofer == id_chofer).first()
     if chofer_db:
         chofer_db.estado_chofer = estado_nuevo
         db.commit()
+
+        if estado_nuevo == "DISPONIBLE" and matricula_activa:
+            vehiculos_activos_sesion[id_chofer] = matricula_activa
+
     url_destino = f"/panel-chofer?id_chofer={id_chofer}"
     return RedirectResponse(url=url_destino, status_code=303)
     

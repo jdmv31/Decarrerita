@@ -18,8 +18,8 @@ class RevisionVehiculo(Base):
     __tablename__ = "revisionvehiculo"
     id_revision = Column(Integer,primary_key = True, index = True)
     id_vehiculo = Column(String,ForeignKey("vehiculos.matricula"))
-    puntuacion = Column(Float,nullable = False)
-    fecha_revision = Column(Date,nullable = False)
+    puntuacion = Column(Float,default=0.0)
+    fecha_revision = Column(Date,server_default = func.current_date())
     
 class Vehiculos (Base):
     __tablename__ = "vehiculos"

@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Solicitar Viaje - Decarrerita{% endblock %}
+
+{% block content %}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
+
+    <style>
+        #mi_mapa { 
+            height: 450px; 
+            width: 100%; 
+            border: 2px solid #ccc; 
+            border-radius: 8px; 
+            margin-bottom: 20px;
+        }
+        #btn_solicitar:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+    </style>
+
+    <div class="contenedor" style="width: 700px; max-width: 95vw;">
+        <h1>Solicitar un Viaje</h1>
+
+        {% if error %}
+            <div style="background-color: #f8d7da; color: #721c24; padding: 15px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #f5c6cb; text-align: left;">
+                En este momento todos nuestros choferes están ocupados o desconectados. Por favor, intenta solicitar tu viaje nuevamente en unos minutos.
+            </div>
+        {% endif %}
+
+        <p style="color: #555; margin-bottom: 15px;" id="instrucciones">
+            Buscando tu ubicacion...
+        </p>
+
+        <div id="mi_mapa"></div>
+
+        <form action="/pasajero/confirmar-viaje" method="POST" onsubmit="mostrarCarga()">
+            <input type="hidden" name="id_pasajero" value="{{ id_pasajero }}">
+            <input type="hidden" name="lat_origen" id="lat_origen">
+            <input type="hidden" name="lng_origen" id="lng_origen">
+            <input type="hidden" name="lat_destino" id="lat_destino">
+            <input type="hidden" name="lng_destino" id="lng_destino">
+            <input type="hidden" name="distancia_km" id="distancia_km">
+            <input type="hidden" name="tiempo_minutos" id="tiempo_minutos">
+            
+            <button type="submit" id="btn_solicitar" disabled style="width: 100%; padding: 15px; background-color: #28a745; color: white; border: none; border-radius: 4px; font-weight: bold; font-size: 1.1em; transition: 0.3s;">
+                Confirmar y Pedir Viaje
+            </button>
+        </form>
+
+        <a href="/panel-pasajero?id_pasajero={{ id_pasajero }}" style="display: block; margin-top: 20px; text-decoration: none; color: #dc3545; font-weight: bold;">
+            Volver al Panel Principal
+        </a>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
+    <script src="{{ url_for('static', path='js/mapa.js') }}?v=1"></script>
+    
+    <script>
+        function mostrarCarga() {
+            const btn = document.getElementById('btn_solicitar');
+            btn.innerText = "Buscando chofer disponible...";
+            btn.style.backgroundColor = "#ffc107";
+            btn.style.color = "black";
+        }
+    </script>
+{% endblock %}
