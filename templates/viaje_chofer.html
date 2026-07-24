@@ -11,7 +11,7 @@
             <p>El pasajero ha reportado un percance y ha cancelado el viaje. Ya te encuentras disponible nuevamente en el sistema.</p>
         </div>
         <a href="/panel-chofer?id_chofer={{ id_chofer }}">
-            <button style="width: 100%; margin-top: 25px; padding: 15px; background-color: #007bff; color: white; border: none; border-radius: 6px; font-size: 1.1em;">
+            <button style="width: 100%; margin-top: 25px; padding: 15px; background-color: #007bff; color: white; border: none; border-radius: 6px; font-size: 1.1em; cursor: pointer;">
                 Volver al Panel
             </button>
         </a>
@@ -32,13 +32,66 @@
             <p><strong>Monto total cobrado al cliente:</strong> ${{ viaje.costo_viaje }}</p>
         </div>
 
-        <div style="background-color: #d4edda; color: #155724; padding: 20px; border-radius: 8px; border: 1px solid #c3e6cb; margin-bottom: 25px;">
+        <div style="background-color: #d4edda; color: #155724; padding: 20px; border-radius: 8px; border: 1px solid #c3e6cb; margin-bottom: 15px;">
             <p style="margin: 0; font-size: 0.9em;">Tu ganancia por este traslado (70%)</p>
             <h1 style="margin: 5px 0 0 0;">${{ ganancia }}</h1>
         </div>
 
+        <!-- Botón que abre el modal Y DETIENE LA RECARGA -->
+        <button type="button" onclick="abrirModalChofer()" style="width: 100%; background-color: #28a745; color: white; border: none; padding: 15px; border-radius: 8px; font-weight: bold; font-size: 1.2em; cursor: pointer; box-shadow: 0 4px 10px rgba(40, 167, 69, 0.3); margin-top: 15px;">
+            Viaje Finalizado
+        </button>
+
+        <!-- Modal de Calificación -->
+        <div id="modalFinalizar" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 1000;">
+            <div style="background: white; padding: 25px; border-radius: 8px; width: 320px; text-align: center; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
+                <h3 style="margin-top: 0; color: #052659;">Califica al Pasajero</h3>
+                <p style="color: #666; font-size: 0.9em;">¿Qué tal fue tu experiencia de traslado con {{ pasajero.nombre }}?</p>
+                
+                <form action="/chofer/finalizar-viaje" method="POST">
+                    <input type="hidden" name="id_chofer" value="{{ id_chofer }}">
+                    <input type="hidden" name="id_viaje" value="{{ viaje.id_viaje }}">
+                    
+                    <select name="calificacion" required style="width: 100%; padding: 12px; margin-bottom: 20px; border-radius: 6px; border: 1px solid #ccc; font-size: 1.05em;">
+                        <option value="" disabled selected>Selecciona una puntuación</option>
+                        <option value="5">⭐⭐⭐⭐⭐ Excelente</option>
+                        <option value="4">⭐⭐⭐⭐ Muy Bueno</option>
+                        <option value="3">⭐⭐⭐ Bueno</option>
+                        <option value="2">⭐⭐ Regular</option>
+                        <option value="1">⭐ Malo</option>
+                    </select>
+                    
+                    <!-- Al dar clic aquí, la petición POST se enviará sin interrupciones -->
+                    <button type="submit" style="width: 100%; background-color: #28a745; color: white; border: none; padding: 12px; border-radius: 6px; font-weight: bold; font-size: 1.1em; cursor: pointer; margin-bottom: 10px;">Confirmar y Finalizar</button>
+                    
+                    <!-- Botón de cancelar reactiva la recarga -->
+                    <button type="button" onclick="cerrarModalChofer()" style="width: 100%; background-color: #dc3545; color: white; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer;">Cancelar</button>
+                </form>
+            </div>
+        </div>
+
         <script>
-            setTimeout(() => window.location.reload(), 5000);
+            // Creamos una variable para guardar el temporizador
+            let temporizadorRecarga;
+
+            function iniciarRecarga() {
+                temporizadorRecarga = setTimeout(() => window.location.reload(), 5000);
+            }
+
+            function abrirModalChofer() {
+                document.getElementById('modalFinalizar').style.display = 'flex';
+                // ¡Magia! Pausamos la bomba de tiempo para que el chofer evalúe con calma
+                clearTimeout(temporizadorRecarga); 
+            }
+
+            function cerrarModalChofer() {
+                document.getElementById('modalFinalizar').style.display = 'none';
+                // Si se arrepiente y cierra el recuadro, volvemos a iniciar el radar
+                iniciarRecarga(); 
+            }
+
+            // Arrancamos el radar de 5 segundos por primera vez al cargar la página
+            iniciarRecarga();
         </script>
     {% endif %}
 

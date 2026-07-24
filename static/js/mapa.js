@@ -5,7 +5,8 @@ document.addEventListener("DOMContentLoaded", function() {
     let latOrigen, lngOrigen;
     let controlRuta = null;
     
-    const btnConfirmar = document.getElementById('btn_confirmar');
+    // Adaptamos el ID al nombre que colocó tu compañera en el HTML
+    const btnSolicitar = document.getElementById('btn_solicitar');
     const textoInstrucciones = document.getElementById('instrucciones');
     const mapa = L.map('mi_mapa').setView([latDefecto, lngDefecto], 13);
     
@@ -48,10 +49,10 @@ document.addEventListener("DOMContentLoaded", function() {
         }
         
         textoInstrucciones.innerHTML = "Calculando ruta...";
-
-        if(btnConfirmar) {
-            btnConfirmar.disabled = true;
-            btnConfirmar.innerText = "Calculando...";
+        
+        if(btnSolicitar) {
+            btnSolicitar.disabled = true;
+            btnSolicitar.innerText = "Calculando...";
         }
         
         controlRuta = L.Routing.control({
@@ -83,22 +84,19 @@ document.addEventListener("DOMContentLoaded", function() {
             fetch(`/api/calcular-tarifa?distancia_km=${distanciaKm}&tiempo_minutos=${tiempoMinutos}`)
                 .then(response => response.json())
                 .then(data => {
-                    document.getElementById('val_distancia').innerText = distanciaKm;
-                    document.getElementById('val_tiempo').innerText = tiempoMinutos;
-                    document.getElementById('val_monto').innerText = data.costo_total;
-                    document.getElementById('recuadro_info').style.display = 'block';
-                    textoInstrucciones.innerHTML = "Ruta trazada. Por favor, revisa el resumen a la derecha.";
-
-                    if(btnConfirmar) {
-                        btnConfirmar.innerText = "Confirmar Viaje";
-                        btnConfirmar.disabled = false;
+                    // Como el recuadro ya no existe, mostramos el resumen en el texto principal
+                    textoInstrucciones.innerHTML = `Ruta trazada (${distanciaKm} km / ${tiempoMinutos} min). Costo total: <strong>$${data.costo_total}</strong>`;
+                    
+                    if(btnSolicitar) {
+                        btnSolicitar.innerText = "¡Pedir Viaje!";
+                        btnSolicitar.disabled = false;
                     }
                 })
                 .catch(error => {
                     console.error("Error al calcular la tarifa:", error);
                     textoInstrucciones.innerHTML = "Error al calcular el precio. Intenta de nuevo.";
-                    if(btnConfirmar) {
-                        btnConfirmar.innerText = "Error";
+                    if(btnSolicitar) {
+                        btnSolicitar.innerText = "Error";
                     }
                 });
         });

@@ -4,15 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Decarrerita{% endblock %}</title>
-    <link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}?v=2.0">
- 
+    <link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}?v=3.0">
 </head>
 <body class="{% block body_class %}{% endblock %}">
-
     <main>
         {% block content %}
         {% endblock %}
     </main>
-
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Busca si en la URL actual existe "id_chofer"
+            const urlParams = new URLSearchParams(window.location.search);
+            const idChofer = urlParams.get('id_chofer');
+            // Si es un chofer, y NO está en la pantalla de aceptar ni en el viaje actual
+            if (idChofer && !window.location.href.includes("chofer/aceptar-viaje") && !window.location.href.includes("chofer/viaje-actual")) {
+                setInterval(() => {
+                    fetch(`/api/chofer/verificar-viaje/${idChofer}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.viaje_pendiente) {
+                                // ¡Viaje encontrado! Redirigimos forzosamente
+                                window.location.href = `/chofer/aceptar-viaje?id_chofer=${idChofer}&id_viaje=${data.id_viaje}`;
+                            }
+                        })
+                        .catch(err => console.error("Error en el radar del chofer:", err));
+                }, 5000); // 5000 milisegundos = 5 segundos
+            }
+        });
+    </script>
 </body>
 </html>

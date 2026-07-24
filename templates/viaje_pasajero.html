@@ -10,16 +10,18 @@
         <p style="color: #555;">Contactando a <strong>{{ chofer.nombre }} {{ chofer.apellido }}</strong>. Por favor, no cierres esta pantalla.</p>
         <div style="margin: 30px 0; font-size: 3em;">⏳</div>
         <script>
+            // Recarga mientras espera que el chofer acepte
             setTimeout(() => window.location.reload(), 4000);
         </script>
 
     {% elif viaje.estado_viaje.name == "CANCELADO" %}
         <div style="background-color: #f8d7da; color: #721c24; padding: 20px; border-radius: 8px; border: 1px solid #f5c6cb;">
             <h2 style="margin-top: 0;">Viaje Cancelado</h2>
-            <p>El viaje ha sido cancelado. El chofer no pudo aceptar la solicitud en este momento o el viaje fue anulado.</p>
+            <p>El viaje ha sido cancelado.</p>
+            <p style="font-size: 0.9em; font-weight: bold;">Nota: Las cancelaciones de viajes en curso generan un cargo del 10% sobre tu saldo por políticas de la empresa.</p>
         </div>
         <a href="/pasajero/solicitar-viaje?id_pasajero={{ id_pasajero }}">
-            <button style="width: 100%; margin-top: 25px; padding: 15px; background-color: #007bff; color: white; border: none; border-radius: 6px; font-size: 1.1em;">
+            <button style="width: 100%; margin-top: 25px; padding: 15px; background-color: #007bff; color: white; border: none; border-radius: 6px; font-size: 1.1em; cursor: pointer;">
                 ¿Desea buscar otro chofer?
             </button>
         </a>
@@ -53,6 +55,40 @@
                 Cancelar Viaje
             </button>
         </form>
+
+        <script>
+            // Recarga para detectar cuando el chofer finalice el viaje
+            setTimeout(() => window.location.reload(), 5000);
+        </script>
+
+    {% elif viaje.estado_viaje.name == "FINALIZADO" %}
+        <div style="background-color: #d4edda; color: #155724; padding: 20px; border-radius: 8px; border: 1px solid #c3e6cb; margin-bottom: 20px;">
+            <h2 style="margin-top: 0;">¡Has llegado a tu destino!</h2>
+            <p>El viaje ha finalizado exitosamente. Se ha descontado el monto de <strong>${{ viaje.costo_viaje }}</strong> de tu billetera virtual.</p>
+        </div>
+
+        <div style="background-color: #f8f9fa; padding: 25px; border-radius: 8px; border: 1px solid #dee2e6; margin-bottom: 25px;">
+            <h3 style="margin-top: 0; color: #052659;">Califica a tu Chofer</h3>
+            <p style="font-size: 0.9em; color: #555;">Ayúdanos a mantener la calidad evaluando el servicio de {{ chofer.nombre }}.</p>
+            
+            <form action="/pasajero/calificar-viaje" method="POST">
+                <input type="hidden" name="id_pasajero" value="{{ id_pasajero }}">
+                <input type="hidden" name="id_viaje" value="{{ viaje.id_viaje }}">
+                
+                <select name="calificacion" required style="width: 100%; padding: 12px; margin-bottom: 20px; border-radius: 6px; border: 1px solid #ccc; font-size: 1.05em;">
+                    <option value="" disabled selected>Selecciona una puntuación</option>
+                    <option value="5">⭐⭐⭐⭐⭐ Excelente</option>
+                    <option value="4">⭐⭐⭐⭐ Muy Bueno</option>
+                    <option value="3">⭐⭐⭐ Bueno</option>
+                    <option value="2">⭐⭐ Regular</option>
+                    <option value="1">⭐ Malo</option>
+                </select>
+                
+                <button type="submit" style="width: 100%; padding: 15px; background-color: #052659; color: white; border: none; border-radius: 6px; font-size: 1.1em; font-weight: bold; cursor: pointer;">
+                    Calificar y Volver al Panel
+                </button>
+            </form>
+        </div>
     {% endif %}
 
 </div>

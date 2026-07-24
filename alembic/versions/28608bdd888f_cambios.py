@@ -1,8 +1,8 @@
-"""edicion
+"""cambios
 
-Revision ID: e71a93a16902
+Revision ID: 28608bdd888f
 Revises: 
-Create Date: 2026-07-07 19:02:19.316816
+Create Date: 2026-07-24 17:26:48.486510
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'e71a93a16902'
+revision: str = '28608bdd888f'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -93,7 +93,6 @@ def upgrade() -> None:
     sa.Column('fecha', sa.Date(), server_default=sa.text('CURRENT_DATE'), nullable=True),
     sa.Column('numero_referencia', sa.String(), nullable=True),
     sa.Column('monto_recargado', sa.Float(), nullable=False),
-    sa.Column('numero_cuenta', sa.String(), nullable=False),
     sa.ForeignKeyConstraint(['id_banco'], ['banco.id_banco'], ),
     sa.ForeignKeyConstraint(['id_pasajero'], ['pasajeros.id_pasajero'], ),
     sa.PrimaryKeyConstraint('id_historial'),
@@ -129,7 +128,7 @@ def upgrade() -> None:
     sa.Column('lugar_inicio', sa.String(), nullable=False),
     sa.Column('lugar_destino', sa.String(), nullable=False),
     sa.Column('fecha_viaje', sa.Date(), nullable=False),
-    sa.Column('estado_viaje', sa.Enum('CANCELADO', 'PAGO', 'EN_ESPERA', name='estadoviaje'), nullable=False),
+    sa.Column('estado_viaje', sa.Enum('CANCELADO', 'PAGO', 'EN_ESPERA', 'FINALIZADO', name='estadoviaje'), nullable=False),
     sa.Column('costo_viaje', sa.Float(), nullable=False),
     sa.Column('puntuacion_chofer', sa.Integer(), nullable=True),
     sa.Column('puntuacion_pasajero', sa.Integer(), nullable=True),
@@ -143,9 +142,9 @@ def upgrade() -> None:
     sa.Column('id_viaje', sa.Integer(), nullable=True),
     sa.Column('id_administrador', sa.Integer(), nullable=True),
     sa.Column('id_chofer', sa.Integer(), nullable=True),
-    sa.Column('fecha_pago', sa.Date(), nullable=False),
-    sa.Column('numero_referencia', sa.Integer(), nullable=False),
-    sa.Column('monto_cancelado', sa.Float(), nullable=False),
+    sa.Column('fecha_pago', sa.Date(), nullable=True),
+    sa.Column('numero_referencia', sa.Integer(), nullable=True),
+    sa.Column('monto_cancelado', sa.Float(), nullable=True),
     sa.ForeignKeyConstraint(['id_administrador'], ['usuarios.id_usuario'], ),
     sa.ForeignKeyConstraint(['id_chofer'], ['choferes.id_chofer'], ),
     sa.ForeignKeyConstraint(['id_viaje'], ['viajes.id_viaje'], ),

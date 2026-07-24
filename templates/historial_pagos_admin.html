@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}Historial y Ganancias - Decarrerita{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    
+    <aside class="panel-izquierdo">
+        <div class="perfil-header">
+            <div class="avatar-placeholder">
+                <img src="{{ url_for('static', path='images/usuario.png') }}" alt="Admin">
+            </div>
+            <h1>Auditoría</h1>
+        </div>
+        <nav class="menu-lateral">
+            <a href="/panel-administracion?rol={{ rol }}&id_admin={{ id_admin }}" class="menu-item">⬅ Volver al Panel</a>
+        </nav>
+    </aside>
+
+    <main class="panel-derecho">
+        <header class="header-principal">
+            <h2>Historial Financiero</h2>
+            <p>Consulta los pagos cancelados y las ganancias retenidas por la empresa.</p>
+        </header>
+
+        <!-- Filtros de Búsqueda -->
+        <div style="background-color: #ffffff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 25px;">
+            <form action="/administracion/historial-pagos" method="GET" style="display: flex; gap: 15px; align-items: flex-end;">
+                <!-- Ocultos para mantener sesión -->
+                <input type="hidden" name="rol" value="{{ rol }}">
+                <input type="hidden" name="id_admin" value="{{ id_admin }}">
+                
+                <div style="flex: 1;">
+                    <label style="font-size: 0.85em; color: #555;">Fecha Inicio:</label>
+                    <input type="date" name="fecha_inicio" value="{{ fecha_inicio or '' }}" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc;">
+                </div>
+                <div style="flex: 1;">
+                    <label style="font-size: 0.85em; color: #555;">Fecha Fin:</label>
+                    <input type="date" name="fecha_fin" value="{{ fecha_fin or '' }}" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc;">
+                </div>
+                <div style="flex: 1;">
+                    <label style="font-size: 0.85em; color: #555;">Filtrar Chofer:</label>
+                    <select name="chofer_id" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc;">
+                        <option value="">Todos los choferes</option>
+                        {% for c in choferes %}
+                            <option value="{{ c.id_usuario }}" {% if chofer_id == c.id_usuario %}selected{% endif %}>
+                                {{ c.nombre }} {{ c.apellido }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <button type="submit" style="padding: 10px 25px; background-color: #052659; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">
+                        Filtrar
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Tarjetas de Resumen Financiero -->
+        <div class="grid-tarjetas" style="margin-bottom: 25px;">
+            <div class="tarjeta-dato" style="background: linear-gradient(135deg, #1f2937 0%, #3b82f6 100%);">
+                <h3>Total Generado (100%)</h3>
+                <p class="valor">${{ total_viajes }}</p>
+            </div>
+            <div class="tarjeta-dato calificacion-card">
+                <h3>Pagado a Choferes (70%)</h3>
+                <p class="valor">${{ total_pagado }}</p>
+            </div>
+            <div class="tarjeta-dato saldo-card">
+                <h3>Ganancia Empresa (30%)</h3>
+                <p class="valor">${{ total_ganancia }}</p>
+            </div>
+        </div>
+
+        <!-- Tabla de Resultados -->
+        <div class="contenedor-tabla">
+            <table class="tabla-estilizada">
+                <thead>
+                    <tr>
+                        <th>Fecha de Pago</th>
+                        <th>ID Viaje</th>
+                        <th>Chofer</th>
+                        <th>N° Referencia</th>
+                        <th class="text-right">Costo Viaje</th>
+                        <th class="text-right">Pago (70%)</th>
+                        <th class="text-right">Ganancia (30%)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for pago, viaje, usuario in pagos %}
+                    <tr class="fila-interactiva">
+                        <td>{{ pago.fecha_pago }}</td>
+                        <td>#{{ viaje.id_viaje }}</td>
+                        <td>{{ usuario.nombre }} {{ usuario.apellido }}</td>
+                        <td>{{ pago.numero_referencia }}</td>
+                        <td class="text-right" style="font-weight: bold; color: #052659;">
+                            ${{ viaje.costo_viaje }}
+                        </td>
+                        <td class="text-right" style="color: #dc3545; font-weight: bold;">
+                            -${{ pago.monto_cancelado }}
+                        </td>
+                        <td class="text-right monto-positivo">
+                            +${{ (viaje.costo_viaje - pago.monto_cancelado)|round(2) }}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 20px; color: #777;">No se encontraron registros para estos filtros.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </main>
+</div>
+{% endblock %}

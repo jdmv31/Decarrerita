@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Historial de Traslados - Decarrerita{% endblock %}
+
+{% block content %}
+    <style>
+        .fila-interactiva { transition: background-color 0.2s ease; }
+        .fila-interactiva:hover { background-color: #d1ecf1; }
+    </style>
+
+    <div class="contenedor" style="width: 800px; max-width: 95vw;">
+        <h1>Historial de Traslados</h1>
+        <p style="color: #555; margin-bottom: 20px;">Aquí puedes ver todos los viajes que has realizado y las ganancias generadas.</p>
+        
+        <table border="1" style="width: 100%; text-align: left; border-collapse: collapse;">
+            <thead>
+                <tr style="background-color: #052659; color: white;">
+                    <th style="padding: 12px;">Fecha</th>
+                    <th style="padding: 12px;">Pasajero</th>
+                    <th style="padding: 12px;">Recorrido</th>
+                    <th style="padding: 12px;">Estado</th>
+                    <th style="padding: 12px;">Calificación Dada</th>
+                    <th style="padding: 12px; text-align: right;">Ganancia (70%)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for viaje, pasajero in viajes %}
+                <tr class="fila-interactiva">
+                    <td style="padding: 12px;">{{ viaje.fecha_viaje }}</td>
+                    <td style="padding: 12px;">{{ pasajero.nombre }} {{ pasajero.apellido }}</td>
+                    <td style="padding: 12px;">{{ viaje.distancia }} km</td>
+                    <td style="padding: 12px;">
+                        <!-- Colores dinámicos dependiendo del estado -->
+                        {% if viaje.estado_viaje.name == 'FINALIZADO' %}
+                            <span style="color: #28a745; font-weight: bold;">Finalizado</span>
+                        {% elif viaje.estado_viaje.name == 'CANCELADO' %}
+                            <span style="color: #dc3545; font-weight: bold;">Cancelado</span>
+                        {% elif viaje.estado_viaje.name == 'PAGO' %}
+                            <span style="color: #007bff; font-weight: bold;">En Curso</span>
+                        {% else %}
+                            <span style="color: #f59e0b; font-weight: bold;">En Espera</span>
+                        {% endif %}
+                    </td>
+                    <td style="padding: 12px;">
+                        {% if viaje.puntuacion_pasajero %}
+                            ⭐ {{ viaje.puntuacion_pasajero }}
+                        {% else %}
+                            <span style="color: #999;">N/A</span>
+                        {% endif %}
+                    </td>
+                    <td style="padding: 12px; text-align: right; font-weight: bold; color: #28a745;">
+                        <!-- Solo calculamos ganancia si el viaje fue en curso o finalizado -->
+                        {% if viaje.estado_viaje.name == 'FINALIZADO' or viaje.estado_viaje.name == 'PAGO' %}
+                            ${{ (viaje.costo_viaje * 0.70)|round(2) }}
+                        {% else %}
+                            $0.00
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" style="padding: 25px; text-align: center; color: #6c757d;">
+                        Aún no has realizado ningún traslado.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <a href="/panel-chofer?id_chofer={{ id_chofer }}" style="display: block; margin-top: 25px; text-decoration: none; color: #dc3545; font-weight: bold;">
+            Volver al Panel Principal
+        </a>
+    </div>
+{% endblock %}

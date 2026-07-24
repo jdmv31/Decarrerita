@@ -7,7 +7,8 @@ from sqlalchemy.orm import Session
 from database import engine, SessionLocal
 import models
 import random
-from datetime import datetime,time
+from datetime import datetime,time,date
+from typing import Optional
 from fastapi.responses import JSONResponse
 
 app = FastAPI(title="API")
@@ -91,9 +92,8 @@ def iniciar_sesion(
     elif usuario_db.rol.lower() == "cliente":
         url_destino = f"/panel-pasajero?id_pasajero={usuario_db.id_usuario}"
         return RedirectResponse(url=url_destino, status_code=303)
-        
-    elif usuario_db.rol.lower() == "superadmin":
-        url_destino = f"/panel-administracion?rol={usuario_db.rol}"
+    elif usuario_db.rol.lower() in ["superadmin", "admin"]: 
+        url_destino = f"/panel-administracion?rol={usuario_db.rol}&id_admin={usuario_db.id_usuario}"
         return RedirectResponse(url=url_destino, status_code=303)
 
 @app.post("/pasajero/saldo/procesar-recarga")
@@ -138,6 +138,40 @@ def recargar_saldo(request: Request, id_pasajero: int):
         request = request,
         name = "recarga_saldo.html",
         context = {"id_pasajero":id_pasajero}
+    )
+
+@app.get("/pasajero/historial")
+def historial_viajes(request: Request, id_pasajero: int, db: Session = Depends(get_db)):
+    viajes_db = db.query(models.Viajes, models.Usuarios).join(
+        models.Usuarios, models.Viajes.id_chofer == models.Usuarios.id_usuario
+    ).filter(
+        models.Viajes.id_pasajero == id_pasajero
+    ).order_by(models.Viajes.id_viaje.desc()).all()
+    
+    return templates.TemplateResponse(
+        request=request,
+        name="historial_viajes.html",
+        context={
+            "id_pasajero": id_pasajero,
+            "viajes": viajes_db
+        }
+    )
+
+@app.get("/chofer/traslados")
+def historial_traslados_chofer(request: Request, id_chofer: int, db: Session = Depends(get_db)):
+    viajes_db = db.query(models.Viajes, models.Usuarios).join(
+        models.Usuarios, models.Viajes.id_pasajero == models.Usuarios.id_usuario
+    ).filter(
+        models.Viajes.id_chofer == id_chofer
+    ).order_by(models.Viajes.id_viaje.desc()).all()
+    
+    return templates.TemplateResponse(
+        request=request,
+        name="historial_chofer.html",
+        context={
+            "id_chofer": id_chofer,
+            "viajes": viajes_db
+        }
     )
 
 @app.get("/pasajero/solicitar-viaje")
@@ -334,20 +368,91 @@ def chofer_viaje_actual(request: Request, id_chofer: int, id_viaje: int, db: Ses
         }
     )
 
-@app.post("/pasajero/cancelar-viaje")
-def cancelar_viaje_pasajero(
-    id_pasajero: int = Form(...), 
+@app.post("/chofer/finalizar-viaje")
+def finalizar_viaje(
+    id_chofer: int = Form(...), 
     id_viaje: int = Form(...), 
+    calificacion: int = Form(3), 
     db: Session = Depends(get_db)
 ):
     viaje_db = db.query(models.Viajes).filter(models.Viajes.id_viaje == id_viaje).first()
-    chofer_db = db.query(models.Choferes).filter(models.Choferes.id_chofer == viaje_db.id_chofer).first()
-    viaje_db.estado_viaje = models.EstadoViaje.CANCELADO
-    if chofer_db:
-        chofer_db.estado_chofer = models.EstadoChofer.DISPONIBLE
+    pasajero_db = db.query(models.Pasajeros).filter(models.Pasajeros.id_pasajero == viaje_db.id_pasajero).first()
+    chofer_db = db.query(models.Choferes).filter(models.Choferes.id_chofer == id_chofer).first()
+
+    if pasajero_db:
+        pasajero_db.saldo_disponible -= viaje_db.costo_viaje
         
-    db.commit()
+    if chofer_db:
+        ganancia = round(viaje_db.costo_viaje * 0.70, 2)
+        chofer_db.saldo_pendiente += ganancia
+        chofer_db.estado_chofer = models.EstadoChofer.DISPONIBLE
+
+    # 1. El chofer califica al pasajero y dejamos un 3 por defecto para el chofer
+    viaje_db.estado_viaje = models.EstadoViaje.FINALIZADO
+    viaje_db.puntuacion_pasajero = calificacion
+    viaje_db.puntuacion_chofer = 3
+
+    # 2. RECALCULAR Y ACTUALIZAR EL PROMEDIO DEL PASAJERO EN SU PERFIL
+    if pasajero_db:
+        viajes_pasajero = db.query(models.Viajes).filter(
+            models.Viajes.id_pasajero == viaje_db.id_pasajero, 
+            models.Viajes.puntuacion_pasajero != None
+        ).all()
+        
+        if viajes_pasajero:
+            promedio_pasajero = sum(v.puntuacion_pasajero for v in viajes_pasajero) / len(viajes_pasajero)
+            pasajero_db.calificacion = round(promedio_pasajero, 1)
+
+    # 3. Recalcular promedio del chofer (con el 3 por defecto)
+    if chofer_db:
+        viajes_chofer = db.query(models.Viajes).filter(
+            models.Viajes.id_chofer == chofer_db.id_chofer,
+            models.Viajes.puntuacion_chofer != None
+        ).all()
+        
+        if viajes_chofer:
+            promedio_chofer = sum(v.puntuacion_chofer for v in viajes_chofer) / len(viajes_chofer)
+            chofer_db.calificacion = round(promedio_chofer, 1)
+
+    # 4. Crear instancia de pago en stand by
+    nuevo_pago = models.PagosChoferes(
+        id_viaje=id_viaje,
+        id_chofer=id_chofer
+    )
+    db.add(nuevo_pago)
     
+    db.commit()
+    return RedirectResponse(url=f"/panel-chofer?id_chofer={id_chofer}", status_code=303)
+
+
+@app.post("/pasajero/calificar-viaje")
+def calificar_viaje_pasajero(
+    id_pasajero: int = Form(...),
+    id_viaje: int = Form(...),
+    calificacion: int = Form(3), # Asume 3 si el pasajero logra enviar el formulario vacío
+    db: Session = Depends(get_db)
+):
+    viaje_db = db.query(models.Viajes).filter(models.Viajes.id_viaje == id_viaje).first()
+    
+    if viaje_db:
+        # El pasajero califica al chofer (sobreescribe el 3 automático que le dimos antes)
+        viaje_db.puntuacion_chofer = calificacion 
+        
+        chofer_db = db.query(models.Choferes).filter(models.Choferes.id_chofer == viaje_db.id_chofer).first()
+        
+        # Volvemos a recalcular el promedio histórico del chofer con la nota real
+        if chofer_db:
+            viajes_chofer = db.query(models.Viajes).filter(
+                models.Viajes.id_chofer == chofer_db.id_chofer,
+                models.Viajes.puntuacion_chofer != None
+            ).all()
+            
+            if viajes_chofer:
+                promedio = sum(v.puntuacion_chofer for v in viajes_chofer) / len(viajes_chofer)
+                chofer_db.calificacion = round(promedio, 1)
+                
+        db.commit()
+        
     return RedirectResponse(url=f"/panel-pasajero?id_pasajero={id_pasajero}", status_code=303)
 
 
@@ -414,11 +519,14 @@ def perfil_pasajero(request:Request, id_pasajero: int, db: Session = Depends(get
     )
 
 @app.get("/panel-administracion")
-def panel_administracion(request: Request, rol: str):
+def panel_administracion(request: Request, rol: str, id_admin: int = 0):
     return templates.TemplateResponse(
         request = request,
         name = "panel_administracion.html",
-        context = {"rol":rol}
+        context = {
+            "rol": rol,
+            "id_admin": id_admin 
+        }
     )
 
 @app.get("/administracion/evaluacion")
@@ -472,10 +580,11 @@ def guardar_revision_vehiculo(
 
     return RedirectResponse(url="/administracion/revision", status_code=303)
 
-@app.get ("/panel-chofer")
+@app.get("/panel-chofer")
 def panel_chofer(request: Request, id_chofer: int, db: Session = Depends(get_db)):
     evaluacion_db = db.query(models.EvaluacionChofer).filter(models.EvaluacionChofer.id_chofer == id_chofer).first()
-    puntuacion = evaluacion_db.puntuacion if evaluacion_db is not None else 0 
+    puntuacion = evaluacion_db.puntuacion if evaluacion_db is not None else 0
+
     cantidad_contactos = db.query(models.AgendaContactos).filter(models.AgendaContactos.id_chofer == id_chofer).count()
     vehiculos_aprobados = db.query(models.Vehiculos).join(
         models.RevisionVehiculo, models.Vehiculos.matricula == models.RevisionVehiculo.id_vehiculo
@@ -484,6 +593,8 @@ def panel_chofer(request: Request, id_chofer: int, db: Session = Depends(get_db)
         models.RevisionVehiculo.puntuacion >= 65
     ).all()
 
+    tiene_banco = db.query(models.DatosBancarios).filter(models.DatosBancarios.id_chofer == id_chofer).first() is not None
+
     return templates.TemplateResponse(
         request= request,
         name = "panel_chofer.html",
@@ -491,8 +602,9 @@ def panel_chofer(request: Request, id_chofer: int, db: Session = Depends(get_db)
             "puntuacion": puntuacion, 
             "id_chofer": id_chofer,
             "vehiculos": vehiculos_aprobados,
-            "cantidad_contactos": cantidad_contactos
-        } 
+            "cantidad_contactos": cantidad_contactos,
+            "tiene_banco": tiene_banco
+        }
     )
 
 @app.get ("/chofer/vehiculo")
@@ -557,6 +669,55 @@ def choferes_registrados(request: Request, rol: str, db: Session = Depends(get_d
             "rol": rol
         }
     )
+
+@app.get("/administracion/pagos")
+def ver_pagos_pendientes(request: Request, id_admin: int, rol: str = "superadmin", db: Session = Depends(get_db)):
+    pagos_pendientes = db.query(models.PagosChoferes, models.Viajes, models.Usuarios).join(
+        models.Viajes, models.PagosChoferes.id_viaje == models.Viajes.id_viaje
+    ).join(
+        models.Usuarios, models.PagosChoferes.id_chofer == models.Usuarios.id_usuario
+    ).filter(
+        models.PagosChoferes.id_administrador == None
+    ).all()
+
+    return templates.TemplateResponse(
+        request=request,
+        name="pagos_pendientes.html",
+        context={
+            "pagos": pagos_pendientes,
+            "rol": rol,
+            "id_admin": id_admin # Pasamos el ID a la vista final
+        }
+    )
+
+@app.post("/administracion/pagos/procesar")
+def procesar_pago_chofer(
+    id_pago: int = Form(...),
+    numero_referencia: int = Form(...),
+    id_admin: int = Form(...), # Recibimos el ID real desde el formulario
+    db: Session = Depends(get_db)
+):
+    pago_db = db.query(models.PagosChoferes).filter(models.PagosChoferes.id_pago == id_pago).first()
+    
+    if pago_db:
+        viaje_db = db.query(models.Viajes).filter(models.Viajes.id_viaje == pago_db.id_viaje).first()
+        chofer_db = db.query(models.Choferes).filter(models.Choferes.id_chofer == pago_db.id_chofer).first()
+        
+        ganancia = round(viaje_db.costo_viaje * 0.70, 2)
+        
+        # ASIGNACIÓN DINÁMICA DEL ADMIN
+        pago_db.id_administrador = id_admin 
+        pago_db.fecha_pago = datetime.now().date()
+        pago_db.numero_referencia = numero_referencia
+        pago_db.monto_cancelado = ganancia
+        
+        if chofer_db:
+            chofer_db.saldo_pendiente -= ganancia
+            
+        db.commit()
+        
+    # Volvemos a la vista pasándole el ID para no perder la sesión
+    return RedirectResponse(url=f"/administracion/pagos?rol=superadmin&id_admin={id_admin}", status_code=303)
 
 @app.get("/administracion/pasajeros")
 def pasajeros_registrados(request: Request,rol:str, db: Session = Depends(get_db)):
@@ -735,10 +896,14 @@ def actualizar_estado(
     db: Session = Depends(get_db)
 ):
     chofer_db = db.query(models.Choferes).filter(models.Choferes.id_chofer == id_chofer).first()
+    if estado_nuevo == "DISPONIBLE":
+        tiene_banco = db.query(models.DatosBancarios).filter(models.DatosBancarios.id_chofer == id_chofer).first()
+        if not tiene_banco:
+            return RedirectResponse(url=f"/panel-chofer?id_chofer={id_chofer}", status_code=303)
+
     if chofer_db:
         chofer_db.estado_chofer = models.EstadoChofer[estado_nuevo]
         db.commit()
-
         if estado_nuevo == "DISPONIBLE" and matricula_activa:
             vehiculos_activos_sesion[id_chofer] = matricula_activa
 
@@ -752,4 +917,62 @@ def reporte_viajes(request: Request, db: Session = Depends(get_db)):
         request=request, 
         name="reporte.html", 
         context={"viajes": viajes_db}
+    )
+
+@app.get("/administracion/historial-pagos")
+def historial_pagos_ganancias(
+    request: Request, 
+    id_admin: int, 
+    rol: str, 
+    fecha_inicio: str = None, # Cambiado a str para soportar el envío vacío ("")
+    fecha_fin: str = None, 
+    chofer_id: str = None, 
+    db: Session = Depends(get_db)
+):
+    # Base de la consulta: Viajes que YA fueron pagados por un administrador
+    query = db.query(models.PagosChoferes, models.Viajes, models.Usuarios).join(
+        models.Viajes, models.PagosChoferes.id_viaje == models.Viajes.id_viaje
+    ).join(
+        models.Usuarios, models.PagosChoferes.id_chofer == models.Usuarios.id_usuario
+    ).filter(
+        models.PagosChoferes.id_administrador != None
+    )
+
+    # Aplicación de filtros dinámicos (ignorando los strings vacíos)
+    if fecha_inicio and fecha_inicio.strip() != "":
+        fecha_ini_date = datetime.strptime(fecha_inicio, "%Y-%m-%d").date()
+        query = query.filter(models.PagosChoferes.fecha_pago >= fecha_ini_date)
+        
+    if fecha_fin and fecha_fin.strip() != "":
+        fecha_fin_date = datetime.strptime(fecha_fin, "%Y-%m-%d").date()
+        query = query.filter(models.PagosChoferes.fecha_pago <= fecha_fin_date)
+        
+    if chofer_id and chofer_id.strip() != "":
+        query = query.filter(models.PagosChoferes.id_chofer == int(chofer_id))
+
+    pagos_realizados = query.order_by(models.PagosChoferes.fecha_pago.desc()).all()
+
+    # Matemáticas de finanzas para el panel superior
+    total_viajes = sum(p.Viajes.costo_viaje for p in pagos_realizados) if pagos_realizados else 0.0
+    total_pagado = sum(p.PagosChoferes.monto_cancelado for p in pagos_realizados) if pagos_realizados else 0.0
+    total_ganancia_empresa = sum((p.Viajes.costo_viaje - p.PagosChoferes.monto_cancelado) for p in pagos_realizados) if pagos_realizados else 0.0
+
+    # Lista de choferes para poblar el menú desplegable del filtro
+    choferes_lista = db.query(models.Usuarios).filter(models.Usuarios.rol == 'chofer').all()
+
+    return templates.TemplateResponse(
+        request=request,
+        name="historial_pagos_admin.html",
+        context={
+            "pagos": pagos_realizados,
+            "rol": rol,
+            "id_admin": id_admin,
+            "total_viajes": round(total_viajes, 2),     # NUEVO: 100%
+            "total_pagado": round(total_pagado, 2),     # 70%
+            "total_ganancia": round(total_ganancia_empresa, 2), # 30%
+            "choferes": choferes_lista,
+            "fecha_inicio": fecha_inicio,
+            "fecha_fin": fecha_fin,
+            "chofer_id": int(chofer_id) if chofer_id and chofer_id.isdigit() else None
+        }
     )
