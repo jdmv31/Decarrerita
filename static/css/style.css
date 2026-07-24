@@ -401,3 +401,50 @@ button:hover {
     box-shadow: 0 0 0 3px rgba(5, 38, 89, 0.1);
     background-color: #ffffff;
 }
+
+/* --- ESTILOS PARA EL MAPA Y SOLICITUD DE VIAJES --- */
+
+#mi_mapa { 
+    height: 700px; /* ¡Mapa más grande! (antes estaba en 450px) */
+    width: 100%; 
+    border-radius: 20px;
+    margin-bottom: 8px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    border: 1px solid rgba(0,0,0,0.05);
+    z-index: 1; 
+}
+
+#btn_solicitar:disabled {
+    background-color: #6c757d !important;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* Clase para cuando el botón está buscando chofer */
+.btn-cargando {
+    background-color: #ffc107 !important;
+    color: black !important;
+}
+
+/* --- ALERTAS MÁS PEQUEÑAS Y COMPACTAS --- */
+.alerta-error {
+    background-color: #f8d7da; 
+    color: #721c24; 
+    padding: 10px 15px; /* Redujimos el relleno */
+    font-size: 0.9rem;  /* Letra más pequeña */
+    border-radius: 8px; 
+    margin-bottom: 15px; 
+    border: 1px solid #f5c6cb; 
+    text-align: left;
+}
+
+.alerta-warning {
+    background-color: #fff3cd; 
+    color: #856404; 
+    padding: 10px 15px; /* Redujimos el relleno */
+    font-size: 0.9rem;  /* Letra más pequeña */
+    border-radius: 8px; 
+    margin-bottom: 15px; 
+    border: 1px solid #ffeeba; 
+    text-align: left;
+}
