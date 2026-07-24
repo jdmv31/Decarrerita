@@ -3,52 +3,66 @@
 {% block title %}Historial de Recargas - Decarrerita{% endblock %}
 
 {% block content %}
-    <style>
-        .fila-interactiva {
-            transition: background-color 0.2s ease;
-        }
-        .fila-interactiva:hover {
-            background-color: #d4edda;
-        }
-    </style>
-
-    <div class="contenedor" style="width: 650px; max-width: 95vw;">
-        <h1>Historial de Recargas</h1>
-        <p style="color: #555; margin-bottom: 20px;">Aquí puedes ver el detalle de todos los pagos y recargas procesadas en tu billetera.</p>
-
-        {% if recargas|length == 0 %}
-            <div style="background-color: #f8f9fa; padding: 20px; border-radius: 5px; text-align: center; border: 1px solid #dee2e6; color: #6c757d;">
-                No has realizado ninguna recarga de saldo aún.
+    <div class="dashboard-container">
+        
+        <!-- PANEL LATERAL -->
+        <aside class="panel-izquierdo">
+            <div class="perfil-header">
+                <div class="avatar-placeholder">
+                    <img src="{{ url_for('static', path='images/usuario.png') }}" alt="Foto de perfil">
+                </div>
+                <h1>Mi Billetera</h1>
             </div>
-        {% else %}
-            <div style="overflow-x: auto; border-radius: 5px; border: 1px solid #dee2e6;">
-                <table style="width: 100%; text-align: left; border-collapse: collapse; font-size: 0.9em;">
-                    <thead>
-                        <tr style="background-color: #f2f2f2; border-bottom: 2px solid #ccc;">
-                            <th style="padding: 12px;">Fecha</th>
-                            <th style="padding: 12px;">Banco Origen</th>
-                            <th style="padding: 12px;">Referencia</th>
-                            <th style="padding: 12px; text-align: right;">Monto</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for recarga, banco in recargas %}
-                        <tr class="fila-interactiva" style="border-bottom: 1px solid #eee;">
-                            <td style="padding: 12px;">{{ recarga.fecha }}</td>
-                            <td style="padding: 12px;">{{ banco.nombre }}</td>
-                            <td style="padding: 12px;">{{ recarga.numero_referencia }}</td>
-                            <td style="padding: 12px; text-align: right; font-weight: bold; color: #28a745;">
-                                +${{ recarga.monto_recargado }}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        {% endif %}
+            
+            <nav class="menu-lateral">
+                <a href="/pasajero/saldo?id_pasajero={{ id_pasajero }}" class="menu-item">← Volver a Saldo</a>
+            </nav>
+        </aside>
 
-        <a href="/pasajero/saldo?id_pasajero={{ id_pasajero }}" style="display: block; margin-top: 25px; text-decoration: none; color: #dc3545; font-weight: bold;">
-            Volver
-        </a>
+        <!-- ÁREA PRINCIPAL -->
+        <main class="panel-derecho">
+            
+            <header class="header-principal">
+                <h2>Historial de Recargas</h2>
+                <p>Aquí puedes ver el detalle de todos los pagos y recargas procesadas en tu billetera.</p>
+            </header>
+
+            <div class="tarjeta-formulario" style="max-width: 100%;">
+                
+                {% if recargas|length == 0 %}
+                    <div class="alerta-warning">
+                        No has realizado ninguna recarga de saldo aún.
+                    </div>
+                {% else %}
+                    <!-- AQUÍ ESTÁ EL CONTENEDOR DE LA TABLA -->
+                    <div class="contenedor-tabla">
+                        <table class="tabla-estilizada">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Banco Origen</th>
+                                    <th>Referencia</th>
+                                    <th class="text-right">Monto</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for recarga, banco in recargas %}
+                                <tr>
+                                    <td>{{ recarga.fecha }}</td>
+                                    <td>{{ banco.nombre }}</td>
+                                    <td>{{ recarga.numero_referencia }}</td>
+                                    <td class="text-right monto-positivo">
+                                        +${{ recarga.monto_recargado }}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% endif %}
+                
+            </div>
+            
+        </main>
     </div>
 {% endblock %}

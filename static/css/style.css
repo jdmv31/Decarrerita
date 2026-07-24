@@ -141,7 +141,7 @@ button:hover {
 
 /* --- MENÚ LATERAL OSCURO --- */
 .panel-izquierdo {
-    width: 260px;
+    width: 200px;
     display: flex;
     flex-direction: column;
     padding: 30px 20px;
@@ -220,8 +220,24 @@ button:hover {
 /* --- ÁREA PRINCIPAL CLARA (La "App") --- */
 .panel-derecho {
     flex-grow: 1;
-    background-color: #f1f4ff; /* Un blanco con un levísimo tono azul/gris */
-    border-radius: 35px; /* Bordes muy redondeados como en tu imagen */
+    background-color: #f1f4ff; 
+    
+    /* --- TU IMAGEN DE FONDO --- */
+    /* Cambia "tu-imagen-mapa.jpg" por el nombre exacto de tu archivo */
+    background-image: url('../images/fondomapa.png'); 
+    
+    /* Hace que la imagen se estire para cubrir todo el panel */
+    background-size: cover; 
+    
+    /* Mantiene la imagen centrada */
+    background-position: center; 
+    
+    /* Evita que se repita como mosaico si es más pequeña que el contenedor */
+    background-repeat: no-repeat; 
+    /* -------------------------- */
+
+    /* Tus estilos originales se mantienen intactos */
+    border-radius: 35px; 
     padding: 50px;
     display: flex;
     flex-direction: column;
@@ -283,6 +299,8 @@ button:hover {
     opacity: 0.8;
 }
 
+
+
 /* Banner de Acción (Solicitar Viaje) */
 .banner-accion {
     background: linear-gradient(135deg, #8E2DE2 0%, #4A00E0 100%); /* Morado llamativo como en la foto */
@@ -294,6 +312,14 @@ button:hover {
     align-items: center;
     box-shadow: 0 15px 30px rgba(74, 0, 224, 0.25);
     margin-top: 10px;
+}
+
+.banner-inicio {
+    /* Combinamos un filtro de color morado con tu foto de fondo */
+    background: linear-gradient(to right, rgba(74, 0, 224, 0.5), rgba(142, 45, 226, 0.1)), url('../images/fondobanner.png');
+    background-size: cover;          /* La foto cubre todo el banner */
+    background-position: center;     /* Centra la foto */
+    background-repeat: no-repeat;    /* Evita que se duplique */
 }
 
 .banner-texto h3 {
@@ -351,12 +377,16 @@ button:hover {
 
 .tarjeta-formulario {
     background-color: #ffffff;
-    padding: 30px;
+    padding: 40px; /* Aumentamos un poquito el relleno para que la tabla respire mejor */
     border-radius: 20px;
     box-shadow: 0 5px 15px rgba(0,0,0,0.05);
     border: 1px solid rgba(0,0,0,0.05);
-    max-width: 800px; /* ¡Aumentamos el ancho de 500px a 800px! */
+    max-width: 1000px; /* Un poco más ancha para que la tabla quepa cómoda */
     width: 100%;
+    
+    /* --- ESTAS DOS LÍNEAS ARREGLAN EL CHOQUE --- */
+    box-sizing: border-box; /* Evita que el padding expanda la tarjeta y la rompa */
+    margin: 0 auto; /* Centra la tarjeta perfectamente en el panel derecho */
 }
 
 /* Transformamos el formulario en una cuadrícula de 2 columnas */
@@ -404,14 +434,38 @@ button:hover {
 
 /* --- ESTILOS PARA EL MAPA Y SOLICITUD DE VIAJES --- */
 
-#mi_mapa { 
-    height: 700px; /* ¡Mapa más grande! (antes estaba en 450px) */
-    width: 100%; 
+/* La nueva barra que alinea el texto y el botón en la misma línea */
+.barra-superior-mapa {
+    display: flex;
+    justify-content: space-between; /* Empuja el texto a la izquierda y el botón a la derecha */
+    align-items: center; /* Los centra verticalmente */
+    background-color: #ffffff;
+    padding: 15px 25px;
     border-radius: 20px;
-    margin-bottom: 8px;
     box-shadow: 0 5px 15px rgba(0,0,0,0.05);
     border: 1px solid rgba(0,0,0,0.05);
-    z-index: 1; 
+}
+
+.texto-estado {
+    margin: 0;
+    font-size: 1.2rem;
+    color: #052659;
+    font-weight: bold;
+}
+
+/* Ajustes para que el formulario no salte de línea */
+.formulario-inline {
+    margin: 0;
+    display: flex;
+    align-items: center;
+}
+
+/* Hacemos el botón un poco más compacto y evitamos que ocupe el 100% del ancho */
+.btn-pedir {
+    width: auto !important;
+    margin-top: 0 !important;
+    padding: 12px 30px !important;
+    font-size: 1.1rem !important;
 }
 
 #btn_solicitar:disabled {
@@ -420,31 +474,99 @@ button:hover {
     opacity: 0.6;
 }
 
-/* Clase para cuando el botón está buscando chofer */
 .btn-cargando {
     background-color: #ffc107 !important;
     color: black !important;
 }
 
-/* --- ALERTAS MÁS PEQUEÑAS Y COMPACTAS --- */
+/* Alertas adaptadas al flujo normal (ocupan todo el ancho) */
+.alerta-error, .alerta-warning {
+    padding: 15px 20px;
+    font-size: 0.95rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    width: 100%; /* Ocupan todo el ancho disponible */
+    box-sizing: border-box;
+}
+
 .alerta-error {
     background-color: #f8d7da; 
     color: #721c24; 
-    padding: 10px 15px; /* Redujimos el relleno */
-    font-size: 0.9rem;  /* Letra más pequeña */
-    border-radius: 8px; 
-    margin-bottom: 15px; 
     border: 1px solid #f5c6cb; 
-    text-align: left;
 }
 
 .alerta-warning {
     background-color: #fff3cd; 
     color: #856404; 
-    padding: 10px 15px; /* Redujimos el relleno */
-    font-size: 0.9rem;  /* Letra más pequeña */
-    border-radius: 8px; 
-    margin-bottom: 15px; 
     border: 1px solid #ffeeba; 
+}
+
+/* El mapa vuelve a la normalidad estirándose verticalmente */
+.mapa-normal {
+    flex-grow: 1; /* Absorbe el espacio libre de la tarjeta */
+    width: 100%;
+    border-radius: 20px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    border: 1px solid rgba(0,0,0,0.05);
+    min-height: 350px;
+}
+
+/* --- ESTILOS PARA LA TABLA DE HISTORIAL (CUADRÍCULA) --- */
+
+.contenedor-tabla {
+    width: 100%;
+    overflow-x: auto;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    /* Borde exterior general de la tabla */
+    border: 1px solid #cbd5e1; 
+}
+
+.tabla-estilizada {
+    width: 100%;
+    /* border-collapse une los bordes para que parezca una cuadrícula perfecta de Excel */
+    border-collapse: collapse; 
+    background-color: #ffffff;
+}
+
+/* --- ENCABEZADOS (La parte de arriba) --- */
+.tabla-estilizada th {
+    background-color: #052659; /* Tu azul corporativo de fondo */
+    color: #ffffff;            /* Letras blancas para contrastar */
+    padding: 16px;
     text-align: left;
+    font-size: 0.95rem;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+    /* Líneas blancas entre los títulos para separarlos */
+    border: 1px solid #1f4581; 
+}
+
+/* --- CELDAS DE DATOS (El contenido) --- */
+.tabla-estilizada td {
+    padding: 16px;
+    font-size: 0.95rem;
+    color: #334155;
+    /* AQUÍ ESTÁ LA MAGIA: Líneas grises divisorias entre CADA celda (vertical y horizontal) */
+    border: 1px solid #e2e8f0; 
+}
+
+/* Un gris súper clarito en las filas pares para no perderse al leer de izquierda a derecha */
+.tabla-estilizada tbody tr:nth-child(even) {
+    background-color: #f8fafc;
+}
+
+/* Efecto al pasar el ratón */
+.tabla-estilizada tbody tr:hover {
+    background-color: #e0e7ff; 
+}
+
+/* Utilidades para los montos */
+.text-right {
+    text-align: right !important;
+}
+
+.monto-positivo {
+    font-weight: bold;
+    color: #16a34a; /* Verde intenso para que resalte la recarga */
 }

@@ -3,7 +3,6 @@
 {% block title %}Solicitar Viaje - Decarrerita{% endblock %}
 
 {% block content %}
-    <!-- Hojas de estilo de Leaflet -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
     
@@ -13,11 +12,10 @@
         <aside class="panel-izquierdo">
             <div class="perfil-header">
                 <div class="avatar-placeholder">
-                    <img src="{{ url_for('static', path='images/avatar.jpg') }}" alt="Foto de perfil">
+                    <img src="{{ url_for('static', path='images/usuario.png') }}" alt="Foto de perfil">
                 </div>
-                <h1>Solicitar</h1>
+                <h1>Solicitar Viaje</h1>
             </div>
-            
             <nav class="menu-lateral">
                 <a href="/panel-pasajero?id_pasajero={{ id_pasajero }}" class="menu-item">← Volver al Panel</a>
             </nav>
@@ -26,15 +24,35 @@
         <!-- ÁREA PRINCIPAL -->
         <main class="panel-derecho">
             
-            <header class="header-principal">
-                <h2>Solicitar un Viaje</h2>
-                <p id="instrucciones">Buscando tu ubicación...</p>
-            </header>
+            <!-- BARRA SUPERIOR: Estado y Botón en la misma línea -->
+            <div class="barra-superior-mapa">
+                <p id="instrucciones" class="texto-estado">Buscando tu ubicación...</p>
 
-            <!-- Alertas de estado -->
+                <form action="/pasajero/confirmar-viaje" method="POST" onsubmit="mostrarCarga()" class="formulario-inline">
+                    <input type="hidden" name="id_pasajero" value="{{ id_pasajero }}">
+                    <input type="hidden" name="lat_origen" id="lat_origen">
+                    <input type="hidden" name="lng_origen" id="lng_origen">
+                    <input type="hidden" name="lat_destino" id="lat_destino">
+                    <input type="hidden" name="lng_destino" id="lng_destino">
+                    <input type="hidden" name="distancia_km" id="distancia_km">
+                    <input type="hidden" name="tiempo_minutos" id="tiempo_minutos">
+                    
+                    {% if saldo_actual > 0 %}
+                        <button type="submit" id="btn_solicitar" class="btn-verde btn-pedir" disabled>
+                            ¡Pedir Viaje!
+                        </button>
+                    {% else %}
+                        <button type="button" id="btn_solicitar" class="btn-pedir" disabled>
+                            Recarga saldo
+                        </button>
+                    {% endif %}
+                </form>
+            </div>
+
+            <!-- ALERTAS (Flujo normal debajo de la barra) -->
             {% if error %}
                 <div class="alerta-error">
-                    En este momento todos nuestros choferes están ocupados o desconectados. Por favor, intenta solicitar tu viaje nuevamente en unos minutos.
+                    En este momento todos nuestros choferes están ocupados o desconectados. Por favor, intenta de nuevo en unos minutos.
                 </div>
             {% endif %}
 
@@ -46,48 +64,24 @@
 
             {% if saldo_actual <= 0 %}
                 <div class="alerta-warning">
-                    <strong>Saldo insuficiente:</strong> Tu saldo actual es $0.00. Debes recargar tu cuenta antes de poder trazar una ruta y solicitar un chofer.
+                    <strong>Saldo insuficiente:</strong> Tu saldo actual es $0.00. Recarga tu cuenta para solicitar un chofer.
                 </div>
             {% endif %}
-            
-            <!-- Contenedor del Mapa -->
-            <div id="mi_mapa"></div>
 
-            <!-- Formulario y Botones -->
-            <form action="/pasajero/confirmar-viaje" method="POST" onsubmit="mostrarCarga()">
-                <input type="hidden" name="id_pasajero" value="{{ id_pasajero }}">
-                <input type="hidden" name="lat_origen" id="lat_origen">
-                <input type="hidden" name="lng_origen" id="lng_origen">
-                <input type="hidden" name="lat_destino" id="lat_destino">
-                <input type="hidden" name="lng_destino" id="lng_destino">
-                <input type="hidden" name="distancia_km" id="distancia_km">
-                <input type="hidden" name="tiempo_minutos" id="tiempo_minutos">
-                
-                {% if saldo_actual > 0 %}
-                    <button type="submit" id="btn_solicitar" class="btn-verde" disabled>
-                        Confirmar y Pedir Viaje
-                    </button>
-                {% else %}
-                    <!-- Botón genérico inhabilitado que hereda estilos de input/button generales -->
-                    <button type="button" id="btn_solicitar" disabled>
-                        Recarga saldo para continuar
-                    </button>
-                {% endif %}
-            </form>
+            <!-- EL MAPA (Ocupa el resto del espacio) -->
+            <div id="mi_mapa" class="mapa-normal"></div>
             
         </main>
     </div>
 
-    <!-- Scripts de Leaflet y lógica del mapa -->
+    <!-- Scripts de Leaflet -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
     <script src="{{ url_for('static', path='js/mapa.js') }}?v=1"></script>
-    
     <script>
         function mostrarCarga() {
             const btn = document.getElementById('btn_solicitar');
-            btn.innerText = "Buscando chofer disponible...";
-            // Ahora aplicamos la clase en lugar de meter CSS con JS
+            btn.innerText = "Buscando chofer...";
             btn.classList.add("btn-cargando");
         }
     </script>
