@@ -1,0 +1,572 @@
+/* 1. REGLAS GLOBALES (Aplican a todo el programa) */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background-color: #f4f4f9; /* Un color gris muy claro para el resto del sistema */
+}
+
+/* 2. REGLAS EXCLUSIVAS DEL LOGIN (Solo aplican al index.html) */
+body.pantalla-login {
+    display: flex;
+    justify-content: flex-start; 
+    align-items: center;
+    height: 100vh;
+    background-image: url('../images/fondo.jpg'); 
+    background-size: cover; 
+    background-position: center; 
+    background-repeat: no-repeat; 
+    background-attachment: fixed; 
+    overflow: hidden; 
+}
+
+.titulo{
+    color: #fff;
+}
+/* Aplicamos box-sizing para que el padding no deforme el 100% del ancho */
+input, select {
+    width: 100%; 
+    box-sizing: border-box; 
+    padding: 12px; /* Campos un poco más altos y cómodos de clickear */
+    margin: 8px 0;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background-color: rgba(255, 255, 255, 0.9); /* Ligeramente transparentes */
+}
+
+button {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px;
+    background-color: #052659;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+.button-inicio {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px;
+    background: linear-gradient(135deg, #052659 0%, #7DA0CA 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+.toggle-link {
+    color: #ffffff; /* Un gris oscuro en lugar de azul para que resalte mejor sobre el fondo difuminado */
+    cursor: pointer;
+    margin-top: 20px;
+    display: block;
+    font-size: 0.9em;
+    font-weight: bold;
+    text-align: center;
+}
+
+.toggle-link:hover {
+    text-decoration: underline;
+}
+
+/* EL ENTORNO 3D */
+.escena-3d {
+    perspective: 1000px; /* Esto da la sensación de profundidad al girar */
+}
+
+/* LA TARJETA QUE GIRA */
+.tarjeta-3d {
+    width: 500px;
+    height: 650px; /* Altura fija para que el formulario de registro (que es más largo) quepa bien */
+    position: relative;
+    transition: transform 0.8s ease-in-out; /* Velocidad y suavidad del giro */
+    transform-style: preserve-3d; /* Mantiene a los hijos en el espacio 3D */
+}
+
+/* LA CLASE QUE AGREGA JAVASCRIPT PARA GIRAR */
+.tarjeta-3d.girada {
+    transform: rotateY(180deg);
+}
+
+/* LAS CARAS DE LA MONEDA (Reemplaza a tu antiguo .contenedor) */
+.cara-tarjeta {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    backface-visibility: hidden; /* Oculta la parte de atrás de la cara cuando está girada */
+    
+    /* Los estilos de cristal que ya tenías */
+    background: linear-gradient(135deg, #020b18e2 0%, #05275989 50%, #134e9688 100%);
+    padding: 40px 60px;
+    border-radius: 0 50px 50px 0; /* Plano a la izquierda, curvo a la derecha */
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    backdrop-filter: blur(8px);
+    box-sizing: border-box;
+    
+    /* Para centrar el contenido verticalmente */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* VOLTEAMOS LA CARA DE REGISTRO POR DEFECTO */
+.cara-trasera {
+    transform: rotateY(180deg);
+}
+
+/*-----------------PANEL PASAJEROS---------------------------*/
+
+/* Contenedor que ocupa toda la pantalla */
+.dashboard-container {
+    display: flex;
+    height: 100vh;
+    background: linear-gradient(135deg, #020b18 0%, #052659 50%, #134e96 100%);
+    padding: 15px 15px 15px 0; /* Padding asimétrico: el menú toca el borde izquierdo, la tarjeta respira a la derecha */
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    overflow: hidden;
+}
+
+/* --- MENÚ LATERAL OSCURO --- */
+.panel-izquierdo {
+    width: 200px;
+    display: flex;
+    flex-direction: column;
+    padding: 30px 20px;
+    color: #ffffff;
+}
+
+.perfil-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 40px;
+    margin-left: 15px;
+}
+
+/* Modificamos el contenedor para que recorte la imagen sobrante */
+.avatar-placeholder {
+    width: 45px;
+    height: 45px;
+    background-color: rgba(255, 255, 255, 0.15);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 20px;
+    overflow: hidden; /* ¡Súper importante! Esto hace que la foto cuadrada se vuelva redonda */
+}
+
+/* Nueva regla específica para la foto */
+.avatar-placeholder img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Esto asegura que la foto se adapte al círculo sin estirarse ni deformarse */
+}
+
+.perfil-header h1 {
+    font-size: 1.4rem;
+    margin: 0;
+    font-weight: 600;
+}
+
+.menu-lateral {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.menu-item {
+    text-decoration: none;
+    color: rgba(255, 255, 255, 0.6);
+    padding: 14px 18px;
+    border-radius: 12px;
+    font-size: 1.05rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.menu-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+}
+
+.btn-cerrar {
+    margin-top: auto;
+    color: #ff6b6b;
+    text-decoration: none;
+    font-weight: bold;
+    padding: 15px;
+    font-size: 1.05rem;
+    transition: color 0.3s;
+}
+
+.btn-cerrar:hover {
+    color: #ff8787;
+}
+
+/* --- ÁREA PRINCIPAL CLARA (La "App") --- */
+.panel-derecho {
+    flex-grow: 1;
+    background-color: #f1f4ff; 
+    
+    /* --- TU IMAGEN DE FONDO --- */
+    /* Cambia "tu-imagen-mapa.jpg" por el nombre exacto de tu archivo */
+    background-image: url('../images/fondomapa.png'); 
+    
+    /* Hace que la imagen se estire para cubrir todo el panel */
+    background-size: cover; 
+    
+    /* Mantiene la imagen centrada */
+    background-position: center; 
+    
+    /* Evita que se repita como mosaico si es más pequeña que el contenedor */
+    background-repeat: no-repeat; 
+    /* -------------------------- */
+
+    /* Tus estilos originales se mantienen intactos */
+    border-radius: 35px; 
+    padding: 50px;
+    display: flex;
+    flex-direction: column;
+    gap: 35px;
+    box-shadow: -5px 0 25px rgba(0,0,0,0.2);
+    overflow: hidden;
+}
+
+.header-principal h2 {
+    font-size: 2.5rem;
+    color: #052659;
+    margin: 0 0 5px 0;
+}
+
+.header-principal p {
+    color: #666;
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+/* Tarjetas de Datos Superiores */
+.grid-tarjetas {
+    display: flex;
+    gap: 25px;
+}
+
+.tarjeta-dato {
+    flex: 1;
+    padding: 30px;
+    border-radius: 25px;
+    color: #ffffff;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+}
+
+/* Colores degradados similares a las portadas de música de tu imagen */
+.saldo-card {
+    background: linear-gradient(135deg, #1e3c72 0%, #628ECB 100%);
+}
+
+.calificacion-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.tarjeta-dato h3 {
+    margin: 0 0 15px 0;
+    font-size: 1.1rem;
+    font-weight: 500;
+    opacity: 0.9;
+}
+
+.tarjeta-dato .valor {
+    margin: 0;
+    font-size: 2.8rem;
+    font-weight: bold;
+}
+
+.tarjeta-dato .valor span {
+    font-size: 1.2rem;
+    opacity: 0.8;
+}
+
+
+
+/* Banner de Acción (Solicitar Viaje) */
+.banner-accion {
+    background: linear-gradient(135deg, #8E2DE2 0%, #4A00E0 100%); /* Morado llamativo como en la foto */
+    border-radius: 30px;
+    padding: 45px;
+    color: #ffffff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 15px 30px rgba(74, 0, 224, 0.25);
+    margin-top: 10px;
+}
+
+.banner-inicio {
+    /* Combinamos un filtro de color morado con tu foto de fondo */
+    background: linear-gradient(to right, rgba(74, 0, 224, 0.5), rgba(142, 45, 226, 0.1)), url('../images/fondobanner.png');
+    background-size: cover;          /* La foto cubre todo el banner */
+    background-position: center;     /* Centra la foto */
+    background-repeat: no-repeat;    /* Evita que se duplique */
+}
+
+.banner-texto h3 {
+    margin: 0 0 10px 0;
+    font-size: 2rem;
+}
+
+.banner-texto p {
+    margin: 0;
+    font-size: 1.15rem;
+    opacity: 0.9;
+}
+
+.btn-solicitar {
+    background-color: #ffffff;
+    color: #4A00E0;
+    border: none;
+    padding: 18px 35px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    border-radius: 16px;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    transition: transform 0.2s, box-shadow 0.2s;
+    width: auto;
+    margin: 0;
+}
+
+.btn-solicitar:hover {
+    transform: translateY(-3px); /* Pequeño salto al pasar el mouse */
+    box-shadow: 0 12px 25px rgba(0,0,0,0.2);
+}
+
+/*----------------------------------------------------------------------*/
+/* Estilos para la sección de Billetera */
+.titulo-seccion {
+    color: #052659;
+    font-size: 1.5rem;
+    margin-top: 35px;
+    margin-bottom: 15px;
+    font-weight: bold;
+}
+
+/* El botón verde de recarga hereda de btn-principal pero cambia el color */
+.btn-verde {
+    background-color: #28a745;
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.2);
+}
+
+.btn-verde:hover {
+    background-color: #218838;
+}
+
+/* --- ESTILOS PARA FORMULARIOS DENTRO DEL DASHBOARD --- */
+
+.tarjeta-formulario {
+    background-color: #ffffff;
+    padding: 40px; /* Aumentamos un poquito el relleno para que la tabla respire mejor */
+    border-radius: 20px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    border: 1px solid rgba(0,0,0,0.05);
+    max-width: 1000px; /* Un poco más ancha para que la tabla quepa cómoda */
+    width: 100%;
+    
+    /* --- ESTAS DOS LÍNEAS ARREGLAN EL CHOQUE --- */
+    box-sizing: border-box; /* Evita que el padding expanda la tarjeta y la rompa */
+    margin: 0 auto; /* Centra la tarjeta perfectamente en el panel derecho */
+}
+
+/* Transformamos el formulario en una cuadrícula de 2 columnas */
+.formulario-estilizado {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Divide en 2 columnas de igual tamaño */
+    column-gap: 25px; /* Espacio horizontal entre las columnas */
+    row-gap: 20px; /* Espacio vertical entre las filas */
+}
+
+.grupo-input {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 0; /* Quitamos esto porque 'row-gap' ya hace el espacio */
+}
+
+/* El botón ocupará todo el ancho de la fila inferior */
+.btn-submit-form {
+    grid-column: span 2; /* Hace que el botón abarque las 2 columnas */
+    margin-top: 10px;
+    padding: 10px !important;
+}
+
+/* (Mantén las reglas de .formulario-estilizado input que ya tenías abajo) */
+.formulario-estilizado input, 
+.formulario-estilizado select {
+    width: 100%;
+    padding: 14px;
+    border-radius: 10px;
+    border: 1px solid #d1d5db;
+    background-color: #f9fafb;
+    font-size: 1rem;
+    color: #1f2937;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.formulario-estilizado input:focus, 
+.formulario-estilizado select:focus {
+    outline: none;
+    border-color: #052659;
+    box-shadow: 0 0 0 3px rgba(5, 38, 89, 0.1);
+    background-color: #ffffff;
+}
+
+/* --- ESTILOS PARA EL MAPA Y SOLICITUD DE VIAJES --- */
+
+/* La nueva barra que alinea el texto y el botón en la misma línea */
+.barra-superior-mapa {
+    display: flex;
+    justify-content: space-between; /* Empuja el texto a la izquierda y el botón a la derecha */
+    align-items: center; /* Los centra verticalmente */
+    background-color: #ffffff;
+    padding: 15px 25px;
+    border-radius: 20px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.texto-estado {
+    margin: 0;
+    font-size: 1.2rem;
+    color: #052659;
+    font-weight: bold;
+}
+
+/* Ajustes para que el formulario no salte de línea */
+.formulario-inline {
+    margin: 0;
+    display: flex;
+    align-items: center;
+}
+
+/* Hacemos el botón un poco más compacto y evitamos que ocupe el 100% del ancho */
+.btn-pedir {
+    width: auto !important;
+    margin-top: 0 !important;
+    padding: 12px 30px !important;
+    font-size: 1.1rem !important;
+}
+
+#btn_solicitar:disabled {
+    background-color: #6c757d !important;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.btn-cargando {
+    background-color: #ffc107 !important;
+    color: black !important;
+}
+
+/* Alertas adaptadas al flujo normal (ocupan todo el ancho) */
+.alerta-error, .alerta-warning {
+    padding: 15px 20px;
+    font-size: 0.95rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    width: 100%; /* Ocupan todo el ancho disponible */
+    box-sizing: border-box;
+}
+
+.alerta-error {
+    background-color: #f8d7da; 
+    color: #721c24; 
+    border: 1px solid #f5c6cb; 
+}
+
+.alerta-warning {
+    background-color: #fff3cd; 
+    color: #856404; 
+    border: 1px solid #ffeeba; 
+}
+
+/* El mapa vuelve a la normalidad estirándose verticalmente */
+.mapa-normal {
+    flex-grow: 1; /* Absorbe el espacio libre de la tarjeta */
+    width: 100%;
+    border-radius: 20px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    border: 1px solid rgba(0,0,0,0.05);
+    min-height: 350px;
+}
+
+/* --- ESTILOS PARA LA TABLA DE HISTORIAL (CUADRÍCULA) --- */
+
+.contenedor-tabla {
+    width: 100%;
+    overflow-x: auto;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    /* Borde exterior general de la tabla */
+    border: 1px solid #cbd5e1; 
+}
+
+.tabla-estilizada {
+    width: 100%;
+    /* border-collapse une los bordes para que parezca una cuadrícula perfecta de Excel */
+    border-collapse: collapse; 
+    background-color: #ffffff;
+}
+
+/* --- ENCABEZADOS (La parte de arriba) --- */
+.tabla-estilizada th {
+    background-color: #052659; /* Tu azul corporativo de fondo */
+    color: #ffffff;            /* Letras blancas para contrastar */
+    padding: 16px;
+    text-align: left;
+    font-size: 0.95rem;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+    /* Líneas blancas entre los títulos para separarlos */
+    border: 1px solid #1f4581; 
+}
+
+/* --- CELDAS DE DATOS (El contenido) --- */
+.tabla-estilizada td {
+    padding: 16px;
+    font-size: 0.95rem;
+    color: #334155;
+    /* AQUÍ ESTÁ LA MAGIA: Líneas grises divisorias entre CADA celda (vertical y horizontal) */
+    border: 1px solid #e2e8f0; 
+}
+
+/* Un gris súper clarito en las filas pares para no perderse al leer de izquierda a derecha */
+.tabla-estilizada tbody tr:nth-child(even) {
+    background-color: #f8fafc;
+}
+
+/* Efecto al pasar el ratón */
+.tabla-estilizada tbody tr:hover {
+    background-color: #e0e7ff; 
+}
+
+/* Utilidades para los montos */
+.text-right {
+    text-align: right !important;
+}
+
+.monto-positivo {
+    font-weight: bold;
+    color: #16a34a; /* Verde intenso para que resalte la recarga */
+}

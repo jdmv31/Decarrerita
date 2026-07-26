@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Recargar Saldo - Decarrerita{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    
+    <aside class="panel-izquierdo">
+        <div class="perfil-header">
+            <div class="avatar-placeholder">
+                <img src="{{ url_for('static', path='images/usuario.png') }}" alt="Foto de perfil">
+            </div>
+            <h1>Billetera</h1>
+        </div>
+        
+        <nav class="menu-lateral">
+            <a href="/pasajero/saldo?id_pasajero={{ id_pasajero }}" class="menu-item">← Volver a Saldo</a>
+            <a href="/panel-pasajero?id_pasajero={{ id_pasajero }}" class="menu-item">Ir al Panel Principal</a>
+        </nav>
+    </aside>
+
+    <main class="panel-derecho">
+        
+        <header class="header-principal">
+            <h2>Recargar Saldo</h2>
+            <p>Ingresa los datos de tu transferencia o pago móvil para procesar la recarga.</p>
+        </header>
+
+        <div class="tarjeta-formulario">
+            <form action="/pasajero/saldo/procesar-recarga" method="POST" class="formulario-estilizado">
+                
+                <input type="hidden" name="id_pasajero" value="{{ id_pasajero }}">
+                
+                <div class="grupo-input">
+                    <label>Banco Origen:</label>
+                    <select name="banco" required>
+                        <option value="" disabled selected>Seleccione su banco</option>
+                        <option value="Bancamiga">0172 - Bancamiga</option>
+                        <option value="Bancaribe">0114 - Bancaribe</option>
+                        <option value="Banco Activo">0171 - Banco Activo</option>
+                        <option value="Banco Agrícola de Venezuela">0166 - Banco Agrícola de Venezuela</option>
+                        <option value="Banco Bicentenario">0175 - Banco Bicentenario</option>
+                        <option value="Banco Caroní">0128 - Banco Caroní</option>
+                        <option value="Banco de Venezuela">0102 - Banco de Venezuela</option>
+                        <option value="Banco Venezolano de Crédito">0104 - Banco Venezolano de Crédito</option>
+                        <option value="Bancrecer">0168 - Bancrecer</option>
+                        <option value="Banesco">0134 - Banesco</option>
+                        <option value="Banco Nacional de Crédito">0191 - Banco Nacional de Crédito</option>
+                        <option value="Banco Plaza">0138 - Banco Plaza</option>
+                        <option value="Banco Provincial">0108 - Banco Provincial</option>
+                        <option value="Del Sur">0157 - Del Sur</option>
+                        <option value="Mercantil">0105 - Mercantil</option>
+                        <option value="Tesoro">0163 - Tesoro</option>
+                    </select>
+                </div>
+                
+                <div class="grupo-input">
+                    <label>Monto a Recargar ($):</label>
+                    <input type="number" name="monto" placeholder="Ej: 10.50" required min="1" step="0.01">
+                </div>
+                <div class="grupo-input">
+                    <label>Número de Referencia:</label>
+                    <input type="text" name="numero_referencia" placeholder="Ej: 1234567890" required>
+                </div>
+                <button type="submit" class="btn-principal btn-verde" style="margin-top: 15px;">
+                    Registrar Pago
+                </button>
+                
+            </form>
+        </div>
+
+    </main>
+</div>
+{% endblock %}
