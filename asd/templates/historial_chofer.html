@@ -1,6 +1,5 @@
-{% extends "base.html" %}
-
-{% block title %}Mis Ganancias - Decarrerita{% endblock %}
+{% extends "base.html" %} 
+{% block title %}Mis Ganancias - Decarrerita{% endblock %} 
 
 {% block content %}
 <div class="dashboard-container">
@@ -19,7 +18,6 @@
     </aside>
 
     <!-- ÁREA PRINCIPAL -->
-    <!-- Se añade overflow-y: auto para permitir scroll si las tablas son largas -->
     <main class="panel-derecho" style="overflow-y: auto;">
         
         <header class="header-principal">
@@ -61,75 +59,85 @@
         </div>
 
         <!-- TABLA 1: PENDIENTES POR PAGAR -->
-        <h3 style="color: #052659; margin-bottom: 10px;">⏳ Viajes Pendientes de Liquidación</h3>
-        <div class="contenedor-tabla" style="margin-bottom: 35px;">
-            <table class="tabla-estilizada">
-                <thead>
-                    <tr>
-                        <th>Fecha del Viaje</th>
-                        <th>ID Viaje</th>
-                        <th>Pasajero</th>
-                        <th>Calificación Recibida</th>
-                        <th class="text-right">Ganancia a Recibir</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in pendientes %}
-                    <tr class="fila-interactiva">
-                        <td>{{ item.viaje.fecha_viaje }}</td>
-                        <td>#{{ item.viaje.id_viaje }}</td>
-                        <td>{{ item.pasajero.nombre }} {{ item.pasajero.apellido }}</td>
-                        <td>
-                            {% if item.viaje.puntuacion_pasajero %}
-                                ⭐ {{ item.viaje.puntuacion_pasajero }}
-                            {% else %}
-                                <span style="color: #999;">N/A</span>
-                            {% endif %}
-                        </td>
-                        <td class="text-right" style="color: #f59e0b; font-weight: bold;">
-                            ${{ item.ganancia }}
-                        </td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="5" style="text-align: center; padding: 20px; color: #777;">No tienes viajes pendientes de pago en este rango de fechas.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <div class="tarjeta-formulario" style="max-width: 100%; margin-bottom: 30px;">
+            <h3 style="color: #052659; margin-top: 0; margin-bottom: 15px;">⏳ Viajes Pendientes de Liquidación</h3>
+            
+            {% if pendientes|length == 0 %}
+                <div class="alerta-warning">
+                    No tienes viajes pendientes de pago en este rango de fechas.
+                </div>
+            {% else %}
+                <div style="overflow-x: auto;">
+                    <table border="1" cellpadding="12" cellspacing="0" style="width: 100%; border-collapse: collapse; border-color: #e2e8f0; background: white;">
+                        <thead>
+                            <tr style="background-color: #052659; color: white; text-align: left;">
+                                <th>Fecha del Viaje</th>
+                                <th>ID Viaje</th>
+                                <th>Pasajero</th>
+                                <th style="text-align: right;">Costo Total Viaje</th>
+                                <th style="text-align: right;">Tu Ganancia (70%)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in pendientes %}
+                            <tr style="border-bottom: 1px solid #e2e8f0;">
+                                <td>{{ item.viaje.fecha_viaje }}</td>
+                                <td>#{{ item.viaje.id_viaje }}</td>
+                                <td>{{ item.pasajero.nombre }} {{ item.pasajero.apellido }}</td>
+                                <td style="text-align: right; color: #052659; font-weight: bold;">
+                                    ${{ item.viaje.costo_viaje }}
+                                </td>
+                                <td style="text-align: right; color: #f59e0b; font-weight: bold;">
+                                    ${{ item.ganancia }}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
         </div>
 
         <!-- TABLA 2: PAGADOS -->
-        <h3 style="color: #052659; margin-bottom: 10px;">✅ Viajes Depositados</h3>
-        <div class="contenedor-tabla">
-            <table class="tabla-estilizada">
-                <thead>
-                    <tr>
-                        <th>Fecha del Viaje</th>
-                        <th>Fecha del Depósito</th>
-                        <th>N° Referencia</th>
-                        <th>Pasajero</th>
-                        <th class="text-right">Monto Recibido</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in pagados %}
-                    <tr class="fila-interactiva">
-                        <td>{{ item.viaje.fecha_viaje }}</td>
-                        <td>{{ item.pago.fecha_pago }}</td>
-                        <td>{{ item.pago.numero_referencia }}</td>
-                        <td>{{ item.pasajero.nombre }} {{ item.pasajero.apellido }}</td>
-                        <td class="text-right monto-positivo">
-                            +${{ item.pago.monto_cancelado }}
-                        </td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="5" style="text-align: center; padding: 20px; color: #777;">No se encontraron viajes liquidados en este rango de fechas.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <div class="tarjeta-formulario" style="max-width: 100%;">
+            <h3 style="color: #052659; margin-top: 0; margin-bottom: 15px;">✅ Viajes Depositados</h3>
+            
+            {% if pagados|length == 0 %}
+                <div class="alerta-warning">
+                    No se encontraron viajes liquidados en este rango de fechas.
+                </div>
+            {% else %}
+                <div style="overflow-x: auto;">
+                    <table border="1" cellpadding="12" cellspacing="0" style="width: 100%; border-collapse: collapse; border-color: #e2e8f0; background: white;">
+                        <thead>
+                            <tr style="background-color: #052659; color: white; text-align: left;">
+                                <th>Fecha del Viaje</th>
+                                <th>Fecha del Depósito</th>
+                                <th>N° Referencia</th>
+                                <th>Pasajero</th>
+                                <th style="text-align: right;">Costo Total Viaje</th>
+                                <th style="text-align: right;">Monto Recibido (70%)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in pagados %}
+                            <tr style="border-bottom: 1px solid #e2e8f0;">
+                                <td>{{ item.viaje.fecha_viaje }}</td>
+                                <td>{{ item.pago.fecha_pago }}</td>
+                                <td>{{ item.pago.numero_referencia }}</td>
+                                <td>{{ item.pasajero.nombre }} {{ item.pasajero.apellido }}</td>
+                                <td style="text-align: right; color: #052659; font-weight: bold;">
+                                    ${{ item.viaje.costo_viaje }}
+                                </td>
+                                <td style="text-align: right; color: #16a34a; font-weight: bold;">
+                                    +${{ item.pago.monto_cancelado }}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
         </div>
 
     </main>

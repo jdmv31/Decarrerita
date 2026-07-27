@@ -1,6 +1,6 @@
-{% extends "base.html" %}
+{% extends "base.html" %} 
 
-{% block title %}Mis Ganancias - Decarrerita{% endblock %}
+{% block title %}Mis Ganancias - Decarrerita{% endblock %} 
 
 {% block content %}
 <div class="dashboard-container">
@@ -13,13 +13,13 @@
             </div>
             <h1>Mis Viajes</h1>
         </div>
+
         <nav class="menu-lateral">
             <a href="/panel-chofer?id_chofer={{ id_chofer }}" class="menu-item">⬅ Volver al Panel</a>
         </nav>
     </aside>
 
     <!-- ÁREA PRINCIPAL -->
-    <!-- Se añade overflow-y: auto para permitir scroll si las tablas son largas -->
     <main class="panel-derecho" style="overflow-y: auto;">
         
         <header class="header-principal">
@@ -60,78 +60,119 @@
             </div>
         </div>
 
-        <!-- TABLA 1: PENDIENTES POR PAGAR -->
-        <h3 style="color: #052659; margin-bottom: 10px;">⏳ Viajes Pendientes de Liquidación</h3>
-        <div class="contenedor-tabla" style="margin-bottom: 35px;">
-            <table class="tabla-estilizada">
-                <thead>
-                    <tr>
-                        <th>Fecha del Viaje</th>
-                        <th>ID Viaje</th>
-                        <th>Pasajero</th>
-                        <th>Calificación Recibida</th>
-                        <th class="text-right">Ganancia a Recibir</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in pendientes %}
-                    <tr class="fila-interactiva">
-                        <td>{{ item.viaje.fecha_viaje }}</td>
-                        <td>#{{ item.viaje.id_viaje }}</td>
-                        <td>{{ item.pasajero.nombre }} {{ item.pasajero.apellido }}</td>
-                        <td>
-                            {% if item.viaje.puntuacion_pasajero %}
-                                ⭐ {{ item.viaje.puntuacion_pasajero }}
-                            {% else %}
-                                <span style="color: #999;">N/A</span>
-                            {% endif %}
-                        </td>
-                        <td class="text-right" style="color: #f59e0b; font-weight: bold;">
-                            ${{ item.ganancia }}
-                        </td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="5" style="text-align: center; padding: 20px; color: #777;">No tienes viajes pendientes de pago en este rango de fechas.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+        <!-- TABLA UNIFICADA: TODOS LOS VIAJES -->
+        <div class="tarjeta-formulario" style="max-width: 100%; margin-bottom: 30px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3 style="color: #052659; margin: 0;">🏁 Historial de Viajes</h3>
+                
+                <!-- Botoncitos de filtrado rápido -->
+                <div style="display: flex; gap: 8px;">
+                    <button type="button" onclick="filtrarTabla('TODOS', this)" class="btn-filtro active" style="padding: 5px 12px; font-size: 0.85em; border-radius: 20px; border: 1px solid #052659; background-color: #052659; color: white; cursor: pointer; transition: 0.2s;">Todos</button>
+                    <button type="button" onclick="filtrarTabla('PAGADO', this)" class="btn-filtro" style="padding: 5px 12px; font-size: 0.85em; border-radius: 20px; border: 1px solid #16a34a; background-color: white; color: #16a34a; cursor: pointer; transition: 0.2s;">Pagados</button>
+                    <button type="button" onclick="filtrarTabla('PENDIENTE', this)" class="btn-filtro" style="padding: 5px 12px; font-size: 0.85em; border-radius: 20px; border: 1px solid #f59e0b; background-color: white; color: #f59e0b; cursor: pointer; transition: 0.2s;">Pendientes</button>
+                    <button type="button" onclick="filtrarTabla('CANCELADO', this)" class="btn-filtro" style="padding: 5px 12px; font-size: 0.85em; border-radius: 20px; border: 1px solid #dc3545; background-color: white; color: #dc3545; cursor: pointer; transition: 0.2s;">Cancelados</button>
+                </div>
+            </div>
+            
+            {% if viajes|length == 0 %}
+                <div class="alerta-warning">
+                    No hay registros de viajes en este rango de fechas.
+                </div>
+            {% else %}
+                <div style="overflow-x: auto;">
+                    <table border="1" cellpadding="12" cellspacing="0" style="width: 100%; border-collapse: collapse; border-color: #e2e8f0; background: white;">
+                        <thead>
+                            <tr style="background-color: #052659; color: white; text-align: left;">
+                                <th>Fecha del Viaje</th>
+                                <th>ID Viaje</th>
+                                <th>Pasajero</th>
+                                <th style="text-align: right;">Costo Total Viaje</th>
+                                <th style="text-align: right;">Tu Ganancia (70%)</th>
+                                <th>Estado</th>
+                                <th>Detalles de Pago</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in viajes %}
+                            <!-- Añadimos el data-estado a la fila para que JS lo identifique -->
+                            <tr class="fila-historial" data-estado="{{ item.estado }}" style="border-bottom: 1px solid #e2e8f0;">
+                                <td>{{ item.viaje.fecha_viaje }}</td>
+                                <td>#{{ item.viaje.id_viaje }}</td>
+                                <td>{{ item.pasajero.nombre }} {{ item.pasajero.apellido }}</td>
+                                <td style="text-align: right; color: #052659; font-weight: bold;">
+                                    ${{ item.viaje.costo_viaje }}
+                                </td>
+                                
+                                {% if item.estado == 'CANCELADO' %}
+                                    <td style="text-align: right; font-weight: bold; color: #dc3545;">
+                                        ${{ item.ganancia }}
+                                    </td>
+                                {% elif item.estado == 'PAGADO' %}
+                                    <td style="text-align: right; font-weight: bold; color: #16a34a;">
+                                        ${{ item.ganancia }}
+                                    </td>
+                                {% else %}
+                                    <td style="text-align: right; font-weight: bold; color: #f59e0b;">
+                                        ${{ item.ganancia }}
+                                    </td>
+                                {% endif %}
 
-        <!-- TABLA 2: PAGADOS -->
-        <h3 style="color: #052659; margin-bottom: 10px;">✅ Viajes Depositados</h3>
-        <div class="contenedor-tabla">
-            <table class="tabla-estilizada">
-                <thead>
-                    <tr>
-                        <th>Fecha del Viaje</th>
-                        <th>Fecha del Depósito</th>
-                        <th>N° Referencia</th>
-                        <th>Pasajero</th>
-                        <th class="text-right">Monto Recibido</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in pagados %}
-                    <tr class="fila-interactiva">
-                        <td>{{ item.viaje.fecha_viaje }}</td>
-                        <td>{{ item.pago.fecha_pago }}</td>
-                        <td>{{ item.pago.numero_referencia }}</td>
-                        <td>{{ item.pasajero.nombre }} {{ item.pasajero.apellido }}</td>
-                        <td class="text-right monto-positivo">
-                            +${{ item.pago.monto_cancelado }}
-                        </td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="5" style="text-align: center; padding: 20px; color: #777;">No se encontraron viajes liquidados en este rango de fechas.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                                <td>
+                                    {% if item.estado == 'CANCELADO' %}
+                                        <span style="color: #dc3545; font-weight: bold;">Cancelado</span>
+                                    {% elif item.estado == 'PAGADO' %}
+                                        <span style="color: #16a34a; font-weight: bold;">Depositado</span>
+                                    {% else %}
+                                        <span style="color: #f59e0b; font-weight: bold;">Pendiente de Pago</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if item.estado == 'PAGADO' %}
+                                        <span style="font-size: 0.9em; color: #555;">Ref: <strong>{{ item.pago.numero_referencia }}</strong></span><br>
+                                        <small style="color: #888;">{{ item.pago.fecha_pago }}</small>
+                                    {% elif item.estado == 'CANCELADO' %}
+                                        <span style="color: #999; font-size: 0.9em;">N/A</span>
+                                    {% else %}
+                                        <span style="color: #f59e0b; font-size: 0.9em;">En espera de liquidación</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
         </div>
-
+        
     </main>
 </div>
+
+<script>
+    // Lógica para filtrar la tabla sin recargar
+    function filtrarTabla(estado, btnSeleccionado) {
+        // 1. Mostrar/Ocultar filas
+        const filas = document.querySelectorAll('.fila-historial');
+        filas.forEach(fila => {
+            if (estado === 'TODOS' || fila.getAttribute('data-estado') === estado) {
+                fila.style.display = '';
+            } else {
+                fila.style.display = 'none';
+            }
+        });
+
+        // 2. Cambiar estilos visuales de los botones (Fondo relleno para el activo)
+        const botones = document.querySelectorAll('.btn-filtro');
+        botones.forEach(btn => {
+            // Reiniciar todos a blanco
+            const colorBorde = btn.style.borderColor;
+            btn.style.backgroundColor = 'white';
+            btn.style.color = colorBorde;
+        });
+
+        // Aplicar relleno al botón clickeado
+        const colorActivo = btnSeleccionado.style.borderColor;
+        btnSeleccionado.style.backgroundColor = colorActivo;
+        btnSeleccionado.style.color = 'white';
+    }
+</script>
 {% endblock %}

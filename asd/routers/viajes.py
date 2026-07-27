@@ -41,7 +41,7 @@ def historial_traslados_chofer(
         models.PagosChoferes, models.Viajes.id_viaje == models.PagosChoferes.id_viaje
     ).filter(
         models.Viajes.id_chofer == id_chofer,
-        models.Viajes.estado_viaje.in_([models.EstadoViaje.FINALIZADO, models.EstadoViaje.CANCELADO])
+        models.Viajes.estado_viaje == models.EstadoViaje.FINALIZADO
     )
 
     if fecha_inicio and fecha_inicio.strip() != "":
@@ -53,39 +53,34 @@ def historial_traslados_chofer(
         query = query.filter(models.Viajes.fecha_viaje <= fecha_fin_date)
         
     viajes_db = query.order_by(models.Viajes.fecha_viaje.desc()).all()
-
-    todos_los_viajes = []
+    pendientes = []
+    pagados = []
     total_ganado = 0.0
     total_pendiente = 0.0
 
     for viaje, pasajero, pago in viajes_db:
-        if viaje.estado_viaje == models.EstadoViaje.CANCELADO:
-            ganancia = 0.0
-            estado = "CANCELADO"
-        else:
-            ganancia = round(viaje.costo_viaje * 0.70, 2)
-            if pago and pago.id_administrador is not None:
-                estado = "PAGADO"
-                total_ganado += ganancia
-            else:
-                estado = "PENDIENTE"
-                total_pendiente += ganancia
-
+        ganancia = round(viaje.costo_viaje * 0.70, 2)
         item = {
             "viaje": viaje,
             "pasajero": pasajero,
             "pago": pago,
-            "ganancia": ganancia,
-            "estado": estado
+            "ganancia": ganancia
         }
-        todos_los_viajes.append(item)
+        
+        if pago and pago.id_administrador is not None:
+            pagados.append(item)
+            total_ganado += ganancia
+        else:
+            pendientes.append(item)
+            total_pendiente += ganancia
 
     return templates.TemplateResponse(
         request=request,
         name="historial_chofer.html",
         context={
             "id_chofer": id_chofer,
-            "viajes": todos_los_viajes,
+            "pendientes": pendientes,
+            "pagados": pagados,
             "total_ganado": round(total_ganado, 2),
             "total_pendiente": round(total_pendiente, 2),
             "fecha_inicio": fecha_inicio,

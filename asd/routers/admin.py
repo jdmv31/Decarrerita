@@ -246,12 +246,10 @@ def historial_pagos_ganancias(
     chofer_id: str = None,
     db: Session = Depends(get_db)
 ):
-    query = db.query(models.Viajes, models.Usuarios, models.PagosChoferes).join(
-        models.Usuarios, models.Viajes.id_chofer == models.Usuarios.id_usuario
-    ).outerjoin(
-        models.PagosChoferes, models.Viajes.id_viaje == models.PagosChoferes.id_viaje
-    ).filter(
-        models.Viajes.estado_viaje.in_([models.EstadoViaje.FINALIZADO, models.EstadoViaje.CANCELADO])
+    query = db.query(models.PagosChoferes, models.Viajes, models.Usuarios).join(
+        models.Viajes, models.PagosChoferes.id_viaje == models.Viajes.id_viaje
+    ).join(
+        models.Usuarios, models.PagosChoferes.id_chofer == models.Usuarios.id_usuario
     )
 
     if fecha_inicio and fecha_inicio.strip() != "":
@@ -263,50 +261,35 @@ def historial_pagos_ganancias(
         query = query.filter(models.Viajes.fecha_viaje <= fecha_fin_date)
         
     if chofer_id and chofer_id.strip() != "":
-        query = query.filter(models.Viajes.id_chofer == int(chofer_id))
+        query = query.filter(models.PagosChoferes.id_chofer == int(chofer_id))
         
     todos_los_registros = query.order_by(models.Viajes.fecha_viaje.desc()).all()
-    
-    viajes_unificados = []
+
+    pagados = []
+    pendientes = []
     total_viajes = 0.0
     total_pagado = 0.0
     total_ganancia_empresa = 0.0
-    
-    for viaje, usuario, pago in todos_los_registros:
-        if viaje.estado_viaje == models.EstadoViaje.CANCELADO:
-            estado = "CANCELADO"
-            pago_chofer = 0.0
-            ganancia_empresa = 0.0
-        else:
-            total_viajes += viaje.costo_viaje
-            if pago and pago.id_administrador is not None:
-                estado = "PAGADO"
-                pago_chofer = pago.monto_cancelado
-                ganancia_empresa = viaje.costo_viaje - pago.monto_cancelado
-                total_pagado += pago_chofer
-                total_ganancia_empresa += ganancia_empresa
-            else:
-                estado = "PENDIENTE"
-                pago_chofer = viaje.costo_viaje * 0.70
-                ganancia_empresa = viaje.costo_viaje * 0.30
-                total_ganancia_empresa += ganancia_empresa
-                
-        viajes_unificados.append({
-            "viaje": viaje,
-            "usuario": usuario,
-            "pago": pago,
-            "pago_chofer": round(pago_chofer, 2),
-            "ganancia_empresa": round(ganancia_empresa, 2),
-            "estado": estado
-        })
+
+    for pago, viaje, usuario in todos_los_registros:
+        total_viajes += viaje.costo_viaje
         
+        if pago.id_administrador is not None:
+            pagados.append((pago, viaje, usuario))
+            total_pagado += pago.monto_cancelado
+            total_ganancia_empresa += (viaje.costo_viaje - pago.monto_cancelado)
+        else:
+            pendientes.append((pago, viaje, usuario))
+            total_ganancia_empresa += (viaje.costo_viaje * 0.30)
+            
     choferes_lista = db.query(models.Usuarios).filter(models.Usuarios.rol == 'chofer').all()
-    
+
     return templates.TemplateResponse(
         request=request,
         name="historial_pagos_admin.html",
         context={
-            "viajes": viajes_unificados,
+            "pagados": pagados,
+            "pendientes": pendientes,
             "rol": rol,
             "id_admin": id_admin,
             "total_viajes": round(total_viajes, 2),

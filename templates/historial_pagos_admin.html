@@ -5,6 +5,7 @@
 {% block content %}
 <div class="dashboard-container">
     
+    <!-- PANEL LATERAL -->
     <aside class="panel-izquierdo">
         <div class="perfil-header">
             <div class="avatar-placeholder">
@@ -17,6 +18,7 @@
         </nav>
     </aside>
 
+    <!-- ÁREA PRINCIPAL -->
     <main class="panel-derecho" style="overflow-y: auto;">
         <header class="header-principal">
             <h2>Historial Financiero</h2>
@@ -72,90 +74,83 @@
             </div>
         </div>
 
-        <!-- TABLA 1: PENDIENTES POR PAGAR -->
-        <h3 style="color: #052659; margin-bottom: 10px;">⏳ Viajes Pendientes por Cancelar</h3>
-        <div class="contenedor-tabla" style="margin-bottom: 35px;">
-            <table class="tabla-estilizada">
-                <thead>
-                    <tr>
-                        <th>Fecha Viaje</th>
-                        <th>ID Viaje</th>
-                        <th>Chofer</th>
-                        <th class="text-right">Monto a Pagar (70%)</th>
-                        {% if rol == 'superadmin' %}
-                            <th class="text-center">Acción</th>
-                        {% endif %}
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for pago, viaje, usuario in pendientes %}
-                    <tr class="fila-interactiva">
-                        <td>{{ viaje.fecha_viaje }}</td>
-                        <td>#{{ viaje.id_viaje }}</td>
-                        <td>{{ usuario.nombre }} {{ usuario.apellido }}</td>
-                        <td class="text-right" style="color: #f59e0b; font-weight: bold;">
-                            ${{ (viaje.costo_viaje * 0.70)|round(2) }}
-                        </td>
-                        {% if rol == 'superadmin' %}
-                        <td style="text-align: center;">
-                            <form action="/administracion/pagos/procesar" method="POST" style="margin: 0; display: flex; gap: 5px; justify-content: center;">
-                                <input type="hidden" name="id_pago" value="{{ pago.id_pago }}">
-                                <input type="hidden" name="id_admin" value="{{ id_admin }}">
-                                <input type="number" name="numero_referencia" placeholder="N° Referencia" required style="padding: 5px; width: 110px; border-radius: 4px; border: 1px solid #ccc;">
-                                <button type="submit" style="background-color: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold;">Liquidar</button>
-                            </form>
-                        </td>
-                        {% endif %}
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="{% if rol == 'superadmin' %}5{% else %}4{% endif %}" style="text-align: center; padding: 20px; color: #777;">No hay viajes pendientes en este filtro.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <!-- TABLA UNIFICADA SIN CSS EXTERNO -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h3 style="color: #052659; margin: 0;">📋 Registro de Operaciones</h3>
+            
+            <div style="display: flex; gap: 8px;">
+                <button type="button" onclick="filtrarTabla('TODOS', this)" class="btn-filtro active" style="padding: 5px 12px; font-size: 0.85em; border-radius: 20px; border: 1px solid #052659; background-color: #052659; color: white; cursor: pointer; transition: 0.2s;">Todos</button>
+                <button type="button" onclick="filtrarTabla('PAGADO', this)" class="btn-filtro" style="padding: 5px 12px; font-size: 0.85em; border-radius: 20px; border: 1px solid #16a34a; background-color: white; color: #16a34a; cursor: pointer; transition: 0.2s;">Liquidados</button>
+                <button type="button" onclick="filtrarTabla('PENDIENTE', this)" class="btn-filtro" style="padding: 5px 12px; font-size: 0.85em; border-radius: 20px; border: 1px solid #f59e0b; background-color: white; color: #f59e0b; cursor: pointer; transition: 0.2s;">Pendientes</button>
+                <button type="button" onclick="filtrarTabla('CANCELADO', this)" class="btn-filtro" style="padding: 5px 12px; font-size: 0.85em; border-radius: 20px; border: 1px solid #dc3545; background-color: white; color: #dc3545; cursor: pointer; transition: 0.2s;">Cancelados</button>
+            </div>
         </div>
 
-        <!-- TABLA 2: YA CANCELADOS -->
-        <h3 style="color: #052659; margin-bottom: 10px;">✅ Viajes Cancelados</h3>
-        <div class="contenedor-tabla">
-            <table class="tabla-estilizada">
-                <thead>
-                    <tr>
-                        <th>Fecha de Pago</th>
-                        <th>ID Viaje</th>
-                        <th>Chofer</th>
-                        <th>N° Referencia</th>
-                        <th class="text-right">Costo Viaje</th>
-                        <th class="text-right">Pago (70%)</th>
-                        <th class="text-right">Ganancia (30%)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for pago, viaje, usuario in pagados %}
-                    <tr class="fila-interactiva">
-                        <td>{{ pago.fecha_pago }}</td>
-                        <td>#{{ viaje.id_viaje }}</td>
-                        <td>{{ usuario.nombre }} {{ usuario.apellido }}</td>
-                        <td>{{ pago.numero_referencia }}</td>
-                        <td class="text-right" style="font-weight: bold; color: #052659;">
-                            ${{ viaje.costo_viaje }}
-                        </td>
-                        <td class="text-right" style="color: #dc3545; font-weight: bold;">
-                            -${{ pago.monto_cancelado }}
-                        </td>
-                        <td class="text-right monto-positivo">
-                            +${{ (viaje.costo_viaje - pago.monto_cancelado)|round(2) }}
-                        </td>
-                    </tr>
+        <table border="1" cellpadding="8" cellspacing="0" style="width: 100%; background-color: white; border-collapse: collapse;">
+            <thead>
+                <tr style="background-color: #052659; color: white; text-align: left;">
+                    <th>Fecha Viaje</th>
+                    <th>ID Viaje</th>
+                    <th>Chofer</th>
+                    <th>Costo Viaje</th>
+                    <th>Ganancia Chofer (70%)</th>
+                    <th>Ganancia Empresa (30%)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in viajes %}
+                <tr class="fila-historial" data-estado="{{ item.estado }}">
+                    <td>{{ item.viaje.fecha_viaje }}</td>
+                    <td>#{{ item.viaje.id_viaje }}</td>
+                    <td>{{ item.usuario.nombre }} {{ item.usuario.apellido }}</td>
+                    
+                    <td style="font-weight: bold;">${{ item.viaje.costo_viaje }}</td>
+                    
+                    {% if item.estado == 'CANCELADO' %}
+                        <td style="color: #999;">$0.0</td>
+                    {% elif item.estado == 'PAGADO' %}
+                        <td style="color: #dc3545;">-${{ item.pago_chofer }}</td>
                     {% else %}
-                    <tr>
-                        <td colspan="7" style="text-align: center; padding: 20px; color: #777;">No se encontraron viajes pagados en este filtro.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+                        <td style="color: #f59e0b; font-weight: bold;">${{ item.pago_chofer }}</td>
+                    {% endif %}
+                    
+                    {% if item.estado == 'CANCELADO' %}
+                        <td style="color: #999;">$0.0</td>
+                    {% else %}
+                        <td style="color: #16a34a; font-weight: bold;">+${{ item.ganancia_empresa }}</td>
+                    {% endif %}
+                </tr>
+                {% else %}
+                <tr class="fila-historial" data-estado="TODOS">
+                    <td colspan="7" style="text-align: center; padding: 20px;">No se encontraron viajes en este filtro.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </main>
 </div>
+
+<script>
+    function filtrarTabla(estado, btnSeleccionado) {
+        const filas = document.querySelectorAll('.fila-historial');
+        filas.forEach(fila => {
+            if (estado === 'TODOS' || fila.getAttribute('data-estado') === estado) {
+                fila.style.display = '';
+            } else {
+                fila.style.display = 'none';
+            }
+        });
+
+        const botones = document.querySelectorAll('.btn-filtro');
+        botones.forEach(btn => {
+            const colorBorde = btn.style.borderColor;
+            btn.style.backgroundColor = 'white';
+            btn.style.color = colorBorde;
+        });
+
+        const colorActivo = btnSeleccionado.style.borderColor;
+        btnSeleccionado.style.backgroundColor = colorActivo;
+        btnSeleccionado.style.color = 'white';
+    }
+</script>
 {% endblock %}
