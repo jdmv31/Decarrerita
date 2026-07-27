@@ -3,40 +3,71 @@
 {% block title %}Choferes Registrados - Decarrerita{% endblock %}
 
 {% block content %}
-    <div>
-        <h1>Choferes Registrados</h1>
-
-        {% if choferes == 0 %}
-            <div style="background-color: #f8f9fa; padding: 20px; border-radius: 5px; text-align: center; border: 1px solid #dee2e6; color: #6c757d;">
-                No hay choferes registrados en el sistema.
+<div class="dashboard-container">
+    
+    <!-- PANEL LATERAL -->
+    <aside class="panel-izquierdo">
+        <div class="perfil-header">
+            <div class="avatar-placeholder">
+                <img src="{{ url_for('static', path='images/usuario.png') }}" alt="Admin">
             </div>
-        {% else %}
-            <table border="1" style="width: 100%; text-align: left; border-collapse: collapse;">
-                <thead>
-                    <tr style="background-color: #f2f2f2;">
-                        <th style="padding: 12px;">ID Chofer</th>
-                        <th style="padding: 12px;">Nombre Completo</th>
-                        <th style="padding: 12px;">C.I</th>
-                        <th style="padding: 12px;">Correo</th>
-                        <th style="padding: 12px;">Calificación</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for usuario, chofer in choferes %}
-                    <tr class="fila-interactiva">
-                        <td style="padding: 12px;">{{ chofer.id_chofer }}</td>
-                        <td style="padding: 12px;">{{ usuario.nombre }} {{ usuario.apellido }}</td>
-                        <td style="padding: 12px;">{{ usuario.cedula }}</td>
-                        <td style="padding: 12px;">{{ usuario.correo }}</td>
-                        <td style="padding: 12px;">{{ chofer.calificacion }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% endif %}
+            <div>
+                <h1>Registro</h1>
+                <span style="color: rgba(255,255,255,0.7); font-size: 0.9em; text-transform: capitalize;">
+                    {{ rol }}
+                </span>
+            </div>
+        </div>
+        
+        <nav class="menu-lateral">
+            <a href="/panel-administracion?rol={{rol}}" class="menu-item">← Volver al Panel</a>
+        </nav>
+    </aside>
 
-        <a href="/panel-administracion?rol={{rol}}" style="display: block; margin-top: 25px; text-decoration: none; color: #dc3545; font-weight: bold;">
-            Volver al Panel Principal
-        </a>
-    </div>
+    <!-- ÁREA PRINCIPAL -->
+    <main class="panel-derecho" style="overflow-y: auto;">
+        
+        <header class="header-principal">
+            <h2>Choferes Registrados</h2>
+            <p>Consulta la lista completa de choferes activos en la plataforma de Decarrerita.</p>
+        </header>
+
+        <div class="tarjeta-formulario" style="max-width: 100%;">
+            
+            {% if choferes == 0 %}
+                <div class="alerta-warning">
+                    No hay choferes registrados en el sistema actualmente.
+                </div>
+            {% else %}
+                <!-- CONTENEDOR DE LA TABLA ESTILIZADA -->
+                <div class="contenedor-tabla">
+                    <table class="tabla-estilizada">
+                        <thead>
+                            <tr>
+                                <th>ID Chofer</th>
+                                <th>Nombre Completo</th>
+                                <th>C.I</th>
+                                <th>Correo</th>
+                                <th>Calificación</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for usuario, chofer in choferes %}
+                            <tr>
+                                <td class="texto-negrita">{{ chofer.id_chofer }}</td>
+                                <td>{{ usuario.nombre }} {{ usuario.apellido }}</td>
+                                <td>{{ usuario.cedula }}</td>
+                                <td class="texto-gris">{{ usuario.correo }}</td>
+                                <td class="texto-naranja">{{ chofer.calificacion }} ⭐</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+            
+        </div>
+        
+    </main>
+</div>
 {% endblock %}

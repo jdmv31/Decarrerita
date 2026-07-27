@@ -11,11 +11,11 @@
             <div class="avatar-placeholder">
                 <img src="{{ url_for('static', path='images/usuario.png') }}" alt="Admin">
             </div>
-            <h1>Auditoría</h1>
+            <h1>Gestión</h1>
         </div>
         <nav class="menu-lateral">
             <a href="/panel-administracion?rol={{ rol }}&id_admin={{ id_admin }}" class="menu-item">⬅ Volver al Panel</a>
-            <a href="/administracion/personal?rol={{ rol }}&id_admin={{ id_admin }}" class="menu-item">👥 Promover Personal</a>
+            <a href="/administracion/personal?rol={{ rol }}&id_admin={{ id_admin }}" class="menu-item">Promover Personal</a>
             <!-- Opción activa -->
             <a href="/administracion/administradores?rol={{ rol }}&id_admin={{ id_admin }}" class="menu-item" style="background-color: rgba(255, 255, 255, 0.1); color: #ffffff;">➕ Agregar Personal</a>
         </nav>
