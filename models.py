@@ -107,9 +107,8 @@ class PagosChoferes(Base):
     id_pago = Column(Integer,primary_key = True)
     id_viaje = Column(Integer,ForeignKey("viajes.id_viaje"))
     id_administrador = Column(Integer,ForeignKey("usuarios.id_usuario"), nullable=True)
-    id_chofer = Column(Integer,ForeignKey("choferes.id_chofer"))
     fecha_pago = Column(Date, nullable=True) 
-    numero_referencia = Column(Integer, unique=True, nullable=True) 
+    numero_referencia = Column(String, unique=True, nullable=True) 
     monto_cancelado = Column(Float, nullable=True)
 
 class Usuarios(Base):

@@ -130,10 +130,8 @@ def ver_pagos_pendientes(request: Request, id_admin: int, rol: str = "superadmin
     pagos_pendientes = db.query(models.PagosChoferes, models.Viajes, models.Usuarios).join(
         models.Viajes, models.PagosChoferes.id_viaje == models.Viajes.id_viaje
     ).join(
-        models.Usuarios, models.PagosChoferes.id_chofer == models.Usuarios.id_usuario
-    ).filter(
-        models.PagosChoferes.id_administrador.is_(None) 
-    ).all()
+        models.Usuarios, models.Viajes.id_chofer == models.Usuarios.id_usuario
+    ).filter(...)
     
     return templates.TemplateResponse(
         request=request,
@@ -156,7 +154,7 @@ def procesar_pago_chofer(
     
     if pago_db:
         viaje_db = db.query(models.Viajes).filter(models.Viajes.id_viaje == pago_db.id_viaje).first()
-        chofer_db = db.query(models.Choferes).filter(models.Choferes.id_chofer == pago_db.id_chofer).first()
+        chofer_db = db.query(models.Choferes).filter(models.Choferes.id_chofer == viaje_db.id_chofer).first()
         
         ganancia = round(viaje_db.costo_viaje * 0.70, 2)
         

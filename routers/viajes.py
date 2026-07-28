@@ -326,8 +326,7 @@ def finalizar_viaje(
             chofer_db.calificacion = round(promedio_chofer, 1)
             
     nuevo_pago = models.PagosChoferes(
-        id_viaje=id_viaje,
-        id_chofer=id_chofer
+        id_viaje=id_viaje
     )
     db.add(nuevo_pago)
     db.commit()
