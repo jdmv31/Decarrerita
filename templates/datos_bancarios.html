@@ -1,44 +1,84 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestionar Datos Bancarios</title>
-    <link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}">
-</head>
-<body>
-    <div class="contenedor">
-        <h1>Datos Bancarios</h1>
-        <p style="font-size: 0.9em; color: #555;">Ingrese sus datos bancarios</p>
+{% extends "base.html" %}
 
-        <form action="/chofer/registrar-datos" method="POST">
-            <input type="hidden" name="id_chofer" value="{{ id_chofer }}">
-            <select name="banco" required style="width: 100%; padding: 10px; border-radius: 4px; border: 1px solid #ccc;">
-                <option value="" disabled selected>Seleccione su banco</option>
-                <option value="Bancamiga">0172 - Bancamiga</option>
-                <option value="Bancaribe">0114 - Bancaribe</option>
-                <option value="Banco Activo">0171 - Banco Activo</option>
-                <option value="Banco Agrícola de Venezuela">0166 - Banco Agrícola de Venezuela</option>
-                <option value="Banco Bicentenario">0175 - Banco Bicentenario</option>
-                <option value="Banco Caroní">0128 - Banco Caroní</option>
-                <option value="Banco de Venezuela">0102 - Banco de Venezuela</option>
-                <option value="Banco Venezolano de Crédito">0104 - Banco Venezolano de Crédito</option>
-                <option value="Bancrecer">0168 - Bancrecer</option>
-                <option value="Banesco">0134 - Banesco</option>
-                <option value="Banco Nacional de Crédito">0191 - Banco Nacional de Crédito</option>
-                <option value="Banco Plaza">0138 - Banco Plaza</option>
-                <option value="Banco Provincial">0108 - Banco Provincial</option>
-                <option value="Del Sur">0157 - Del Sur</option>
-                <option value="Mercantil">0105 - Mercantil</option>
-                <option value="Tesoro">0163 - Tesoro</option>
-            </select>
-            <input type="number" name="numero_cuenta" placeholder="Ej: 1234567890" required>
-            <button type="submit" style="margin-top: 15px;">Registrar Datos</button>
-        </form>
+{% block title %}Datos Bancarios - Decarrerita{% endblock %}
 
-        <a href="/panel-chofer?id_chofer={{ id_chofer }}" style="display: block; margin-top: 15px; text-decoration: none; color: #6c757d; font-size: 0.9em;">
-            Cancelar y Volver
-        </a>
-    </div>
-</body>
-</html>
+{% block content %}
+<div class="dashboard-container">
+    
+    <!-- PANEL LATERAL -->
+    <aside class="panel-izquierdo">
+        <div class="perfil-header">
+            <div class="avatar-placeholder">
+                <img src="{{ url_for('static', path='images/usuario.png') }}" alt="Foto de perfil">
+            </div>
+            <div>
+                <h1>Billetera</h1>
+            </div>
+        </div>
+        
+        <nav class="menu-lateral">
+            <a href="/panel-chofer?id_chofer={{ id_chofer }}" class="menu-item">← Volver al Panel</a>
+        </nav>
+    </aside>
+
+    <!-- ÁREA PRINCIPAL -->
+    <main class="panel-derecho" style="overflow-y: auto;">
+        
+        <header class="header-principal">
+            <h2>Datos Bancarios</h2>
+            <p>Registra o actualiza la cuenta bancaria donde recibirás el pago por tus servicios.</p>
+        </header>
+
+        <!-- TARJETA DEL FORMULARIO -->
+        <div class="tarjeta-formulario" style="max-width: 550px;">
+            
+            <form action="/chofer/registrar-datos" method="POST">
+                <input type="hidden" name="id_chofer" value="{{ id_chofer }}">
+                
+                <div class="grupo-input" style="margin-bottom: 20px;">
+                    <label style="display: block; font-weight: bold; margin-bottom: 8px; color: #475569;">
+                        Banco Destino:
+                    </label>
+                    <select name="banco" required style="width: 100%; padding: 14px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 1rem; box-sizing: border-box; background-color: #f8fafc; color: #334155;">
+                        <option value="" disabled selected>Seleccione su banco...</option>
+                        <option value="Bancamiga">0172 - Bancamiga</option>
+                        <option value="Bancaribe">0114 - Bancaribe</option>
+                        <option value="Banco Activo">0171 - Banco Activo</option>
+                        <option value="Banco Agrícola de Venezuela">0166 - Banco Agrícola de Venezuela</option>
+                        <option value="Banco Bicentenario">0175 - Banco Bicentenario</option>
+                        <option value="Banco Caroní">0128 - Banco Caroní</option>
+                        <option value="Banco de Venezuela">0102 - Banco de Venezuela</option>
+                        <option value="Banco Venezolano de Crédito">0104 - Banco Venezolano de Crédito</option>
+                        <option value="Bancrecer">0168 - Bancrecer</option>
+                        <option value="Banesco">0134 - Banesco</option>
+                        <option value="Banco Nacional de Crédito">0191 - Banco Nacional de Crédito</option>
+                        <option value="Banco Plaza">0138 - Banco Plaza</option>
+                        <option value="Banco Provincial">0108 - Banco Provincial</option>
+                        <option value="Del Sur">0157 - Del Sur</option>
+                        <option value="Mercantil">0105 - Mercantil</option>
+                        <option value="Tesoro">0163 - Tesoro</option>
+                    </select>
+                </div>
+
+                <div class="grupo-input" style="margin-bottom: 30px;">
+                    <label style="display: block; font-weight: bold; margin-bottom: 8px; color: #475569;">
+                        Número de Cuenta (20 dígitos):
+                    </label>
+                    <input type="number" name="numero_cuenta" placeholder="Ej: 01020000000000000000" required style="width: 100%; padding: 14px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 1rem; box-sizing: border-box; background-color: #f8fafc; color: #334155;">
+                </div>
+
+                <!-- BOTONES -->
+                <button type="submit" class="btn-ancho btn-verde" style="margin-bottom: 12px;">
+                    Guardar Datos Bancarios
+                </button>
+                
+                <!-- Convertimos el enlace de cancelar en un botón falso rojo para mantener la simetría -->
+                <a href="/panel-chofer?id_chofer={{ id_chofer }}" class="btn-ancho btn-rojo" style="display: block; text-align: center; text-decoration: none; box-sizing: border-box;">
+                    Cancelar y Volver
+                </a>
+            </form>
+            
+        </div>
+    </main>
+</div>
+{% endblock %}

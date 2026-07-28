@@ -1,41 +1,94 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Perfil - Decarrerita</title>
-    <link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}">
-</head>
-<body>
-    <div class="contenedor" style="width: 400px;">
-        <h1>Mi Perfil</h1>
+{% extends "base.html" %}
+
+{% block title %}Mi Perfil - Decarrerita{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    
+    <!-- PANEL LATERAL -->
+    <aside class="panel-izquierdo">
+        <div class="perfil-header">
+            <div class="avatar-placeholder">
+                <img src="{{ url_for('static', path='images/usuario.png') }}" alt="Foto de perfil">
+            </div>
+            <div>
+                <h1>Mi Perfil</h1>
+            </div>
+        </div>
         
-        <div style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: left; border: 1px solid #dee2e6;">
-            <h3 style="margin-top: 0; color: #333; border-bottom: 1px solid #ccc; padding-bottom: 5px;">Información Personal</h3>
-            <p><strong>Nombre:</strong> {{ usuario.nombre }} {{ usuario.apellido }}</p>
-            <p><strong>Cédula:</strong> {{ usuario.cedula }}</p>
-            <p><strong>Correo:</strong> {{ usuario.correo }}</p>
-            <p><strong>Dirección:</strong> {{ usuario.direccion }}</p>
-        </div>
+        <nav class="menu-lateral">
+            <!-- Botón de retorno al panel principal del chofer con sus parámetros -->
+            <a href="/panel-chofer?puntuacion={{ evaluacion.puntuacion if evaluacion else 0 }}&id_chofer={{ id_chofer }}" class="menu-item">← Volver al Panel</a>
+        </nav>
+    </aside>
 
-        <div style="background-color: #e9ecef; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: left; border: 1px solid #ced4da;">
-            <h3 style="margin-top: 0; color: #333; border-bottom: 1px solid #ccc; padding-bottom: 5px;">Desempeño General</h3>
-            
-            <p><strong>Calificación de Pasajeros:</strong> {{ chofer.calificacion }} / 5.0</p>
-            
-            <p><strong>Evaluación Psicologica:</strong> 
-                {% if evaluacion and evaluacion.puntuacion > 0 %}
-                    <span style="color: green; font-weight: bold;">{{ evaluacion.puntuacion }} / 100 pts</span>
-                {% else %}
-                    <span style="color: #856404;">Pendiente por el Administrador</span>
-                {% endif %}
-            </p>
-            <p><strong>Saldo Pendiente:</strong> ${{ chofer.saldo_pendiente }}</p>
-        </div>
+    <!-- ÁREA PRINCIPAL -->
+    <main class="panel-derecho" style="overflow-y: auto;">
+        
+        <header class="header-principal">
+            <h2>Mis Datos Personales</h2>
+            <p>Consulta la información básica de tu cuenta y tu desempeño en la plataforma.</p>
+        </header>
 
-        <a href="/panel-chofer?puntuacion={{ evaluacion.puntuacion if evaluacion else 0 }}&id_chofer={{ id_chofer }}" style="display: block; margin-top: 15px; text-decoration: none; color: #007bff; font-weight: bold;">
-            Volver al Panel Principal
-        </a>
-    </div>
-</body>
-</html>
+        <div style="max-width: 900px;">
+            
+            <!-- TARJETA: INFORMACIÓN PERSONAL -->
+            <div class="tarjeta-formulario" style="margin-bottom: 30px;">
+                <h3 class="titulo-seccion-admin" style="margin-top: 0;">👤 Información Personal</h3>
+                
+                <div class="grid-datos">
+                    <div class="dato-item sin-fondo">
+                        <p class="dato-label">Nombre Completo</p>
+                        <p class="dato-valor texto-negrita">{{ usuario.nombre }} {{ usuario.apellido }}</p>
+                    </div>
+                    
+                    <div class="dato-item sin-fondo">
+                        <p class="dato-label">Cédula de Identidad</p>
+                        <p class="dato-valor texto-negrita">{{ usuario.cedula }}</p>
+                    </div>
+                    
+                    <div class="dato-item sin-fondo">
+                        <p class="dato-label">Correo Electrónico</p>
+                        <p class="dato-valor texto-negrita">{{ usuario.correo }}</p>
+                    </div>
+                    
+                    <div class="dato-item sin-fondo">
+                        <p class="dato-label">Dirección de Residencia</p>
+                        <p class="dato-valor texto-negrita">{{ usuario.direccion }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TARJETA: DESEMPEÑO GENERAL -->
+            <div class="tarjeta-formulario">
+                <h3 class="titulo-seccion-admin" style="margin-top: 0;">⭐ Desempeño General</h3>
+                
+                <div class="grid-datos">
+                    <!-- Calificación -->
+                    <div class="dato-item">
+                        <p class="dato-label">Calificación de Pasajeros</p>
+                        <p class="dato-valor texto-naranja texto-negrita">{{ chofer.calificacion }} / 5.0</p>
+                    </div>
+
+                    <!-- Evaluación Psicológica -->
+                    <div class="dato-item">
+                        <p class="dato-label">Evaluación Psicológica</p>
+                        {% if evaluacion and evaluacion.puntuacion > 0 %}
+                            <p class="dato-valor texto-verde texto-negrita">{{ evaluacion.puntuacion }} / 100 pts</p>
+                        {% else %}
+                            <p class="dato-valor texto-naranja texto-negrita" style="font-size: 1rem;">En Revisión</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Saldo -->
+                    <div class="dato-item">
+                        <p class="dato-label">Saldo Pendiente</p>
+                        <p class="dato-valor texto-rojo texto-negrita">${{ chofer.saldo_pendiente }}</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+</div>
+{% endblock %}

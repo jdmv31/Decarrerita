@@ -789,3 +789,134 @@ button:hover {
 
 .btn-rojo { background-color: #f8fafc; color: #dc3545; border: 1px solid #e2e8f0; }
 .btn-rojo:hover { background-color: #f1f5f9; }
+
+/* --- ESTILOS PARA LA VISTA DE PERFIL DE USUARIO --- */
+
+.grid-datos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.dato-item {
+    background-color: #f8fafc; /* Gris extra claro */
+    padding: 16px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+}
+
+.dato-item.sin-fondo {
+    background-color: transparent;
+    border: none;
+    padding: 0;
+}
+
+.dato-label {
+    color: #64748b;
+    font-size: 0.9rem;
+    margin: 0 0 5px 0;
+    font-weight: 500;
+}
+
+.dato-valor {
+    font-size: 1.15rem;
+    margin: 0;
+    color: #1e293b;
+}
+
+/* --- ESTILOS PARA INPUTS AGRUPADOS (Ej: Teléfonos) --- */
+
+.input-agrupado {
+    display: flex;
+    gap: 15px;
+    width: 100%;
+}
+
+.input-agrupado select {
+    width: 35%;
+    padding: 14px;
+    border-radius: 10px;
+    border: 1px solid #cbd5e1;
+    background-color: #f8fafc;
+    color: #334155;
+    font-size: 1rem;
+}
+
+.input-agrupado input {
+    width: 65%;
+    padding: 14px;
+    border-radius: 10px;
+    border: 1px solid #cbd5e1;
+    background-color: #f8fafc;
+    color: #334155;
+    font-size: 1rem;
+    box-sizing: border-box;
+}
+
+/* --- CLASES REUTILIZABLES PARA FORMULARIOS --- */
+
+.texto-descripcion {
+    color: #475569;
+    font-size: 0.95rem;
+    margin-bottom: 25px;
+}
+
+.ancho-max-600 {
+    max-width: 600px;
+}
+
+.label-estandar {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #475569;
+}
+
+.input-estandar {
+    width: 100%;
+    padding: 14px;
+    border-radius: 10px;
+    border: 1px solid #cbd5e1;
+    font-size: 1rem;
+    box-sizing: border-box;
+    background-color: #f8fafc;
+    color: #334155;
+    transition: border-color 0.2s;
+}
+
+.input-estandar:focus {
+    outline: none;
+    border-color: #052659;
+    background-color: #ffffff;
+}
+
+.grid-2-col {
+    display: grid;
+    /* Crea dos columnas que se adaptan a 1 sola en pantallas pequeñas */
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.grupo-botones {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 30px;
+}
+
+.link-boton {
+    display: block;
+    text-align: center;
+    text-decoration: none;
+    box-sizing: border-box;
+}
+
+/* --- UTILIDAD PARA SCROLL EN PANELES --- */
+.panel-con-scroll {
+    overflow-y: auto;
+    height: 100vh; /* Se asegura de usar la altura de la ventana */
+    padding-bottom: 60px; /* El colchón de espacio al final */
+    box-sizing: border-box;
+}

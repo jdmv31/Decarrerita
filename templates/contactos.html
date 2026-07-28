@@ -1,54 +1,89 @@
 {% extends "base.html" %}
 
-{% block title %}Decarrerita - Inicio{% endblock %}
+{% block title %}Contactos de Emergencia - Decarrerita{% endblock %}
 
 {% block content %}
-    <div class="contenedor" style="width: 350px;">
-        <h1>Contactos de Emergencia</h1>
-        <h3 style="text-align: left; margin-bottom: 10px;">Acciones</h3>
+<div class="dashboard-container">
+    
+    <!-- PANEL LATERAL -->
+    <aside class="panel-izquierdo">
+        <div class="perfil-header">
+            <div class="avatar-placeholder">
+                <img src="{{ url_for('static', path='images/usuario.png') }}" alt="Foto de perfil">
+            </div>
+            <div>
+                <h1>Seguridad</h1>
+            </div>
+        </div>
+        
+        <nav class="menu-lateral">
+            <a href="/panel-chofer?id_chofer={{ id_chofer }}" class="menu-item">← Volver al Panel</a>
+        </nav>
+    </aside>
 
-        <div style="display: flex; flex-direction: column; gap: 10px;">
+    <!-- ÁREA PRINCIPAL -->
+    <main class="panel-derecho" style="overflow-y: auto;">
+        
+        <header class="header-principal">
+            <h2>Contactos de Emergencia</h2>
+            <p>Registra a las personas de confianza a las que podamos contactar en caso de cualquier eventualidad.</p>
+        </header>
+
+        <div class="tarjeta-formulario" style="max-width: 600px;">
+            
             {% if contactos == 2 %}
-                <div style="background-color: #d1ecf1; color: #0c5460; padding: 15px; border-radius: 5px; text-align: left; font-size: 0.9em; border: 1px solid #bee5eb;">
-                    <h4 style="margin-top: 0; margin-bottom: 5px;">Límite Alcanzado</h4>
-                    <p style="margin: 0;">Ya tienes registrados tus 2 contactos de emergencia permitidos.</p>
+                <!-- Límite alcanzado -->
+                <div class="alerta-warning" style="background-color: #e0f2fe; border: 1px solid #bae6fd; color: #0369a1;">
+                    <h3 style="margin-top: 0; margin-bottom: 8px;">✅ Límite Alcanzado</h3>
+                    <p style="margin: 0;">Ya tienes registrados tus 2 contactos de emergencia permitidos por el sistema. Estás listo para continuar.</p>
                 </div>
             {% else %}
-                <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; text-align: left; border: 1px solid #dee2e6;">
-                    <p style="margin-top: 0; font-size: 0.9em; color: #555;">Agrega un contacto de emergencia (te quedan {{ 2 - contactos }} disponibles).</p>
+                <!-- Formulario de registro -->
+                <h3 class="titulo-seccion-admin" style="margin-top: 0;">Agregar Nuevo Contacto</h3>
+                <p style="color: #64748b; margin-bottom: 25px;">Te quedan <strong>{{ 2 - contactos }}</strong> espacios disponibles.</p>
+                
+                <form action="/chofer/registrar-contacto" method="POST">
+                    <input type="hidden" name="id_chofer" value="{{ id_chofer }}">
                     
-                    <form action="/chofer/registrar-contacto" method="POST">
-                        <input type="hidden" name="id_chofer" value="{{ id_chofer }}">
+                    <div class="grupo-input" style="margin-bottom: 20px;">
+                        <label style="display: block; font-weight: bold; margin-bottom: 8px; color: #475569;">
+                            Nombre Completo:
+                        </label>
+                        <input type="text" name="nombre" placeholder="Ej: María Pérez" required style="width: 100%; padding: 14px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 1rem; box-sizing: border-box; background-color: #f8fafc; color: #334155;">
+                    </div>
+                    
+                    <div class="grupo-input" style="margin-bottom: 30px;">
+                        <label style="display: block; font-weight: bold; margin-bottom: 8px; color: #475569;">
+                            Número Telefónico:
+                        </label>
                         
-                        <label style="display: block; margin-bottom: 5px; font-size: 0.9em; color: #333;">Nombre Completo:</label>
-                        <input type="text" name="nombre" placeholder="Ej: Maria Perez" required style="width: 100%; padding: 10px; margin-bottom: 15px; border-radius: 4px; border: 1px solid #ccc; box-sizing: border-box;">
-                        
-                        <label style="display: block; margin-bottom: 5px; font-size: 0.9em; color: #333;">Número Telefónico:</label>
-                        
-                        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-                            <select name="numeral" required style="padding: 10px; border-radius: 4px; border: 1px solid #ccc; background-color: white; width: 35%; box-sizing: border-box;">
+                        <!-- Contenedor flexible que creamos en el CSS -->
+                        <div class="input-agrupado">
+                            <select name="numeral" required>
                                 <option value="" disabled selected>Cód.</option>
                                 <option value="0412">0412</option>
                                 <option value="0414">0414</option>
                                 <option value="0416">0416</option>
-                                <option value="0416">0422</option>
+                                <option value="0422">0422</option> <!-- ¡Corregido! -->
                                 <option value="0424">0424</option>
                                 <option value="0426">0426</option>
                             </select>
                             
-                            <input type="text" name="numero" placeholder="Ej: 1234567" required minlength="7" maxlength="7" pattern="\d{7}" title="Debe contener exactamente 7 números" style="width: 65%; padding: 10px; border-radius: 4px; border: 1px solid #ccc; box-sizing: border-box;">
+                            <input type="text" name="numero" placeholder="Ej: 1234567" required minlength="7" maxlength="7" pattern="\d{7}" title="Debe contener exactamente 7 números">
                         </div>
+                    </div>
+                
+                    <button type="submit" class="btn-ancho" style="background-color: #052659; color: white; margin-bottom: 12px;">
+                        Registrar Contacto
+                    </button>
                     
-                        <button type="submit" style="width: 100%; padding: 10px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
-                            Registrar Contacto
-                        </button>
-                    </form>
-                </div>
+                    <a href="/panel-chofer?id_chofer={{ id_chofer }}" class="btn-ancho btn-rojo" style="display: block; text-align: center; text-decoration: none; box-sizing: border-box;">
+                        Cancelar y Volver
+                    </a>
+                </form>
             {% endif %}
+            
         </div>
-
-        <a href="/panel-chofer?id_chofer={{ id_chofer }}" style="display: block; margin-top: 20px; text-decoration: none; color: #6c757d; font-size: 0.9em; font-weight: bold;">
-            Volver al Panel Principal
-        </a>
-    </div>
+    </main>
+</div>
 {% endblock %}
