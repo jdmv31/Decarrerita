@@ -30,7 +30,12 @@
         </header>
 
         <div class="tarjeta-formulario ancho-max-600">
-            
+            {% if error %}
+                <div class="alerta-error" style="margin-bottom: 20px; text-align: center;">
+                    <strong>Atención!</strong> {{ error }}
+                </div>
+            {% endif %}
+
             <form action="/chofer/vehiculo" method="POST">
                 <input type="hidden" name="id_chofer" value="{{ id_chofer }}">
                 

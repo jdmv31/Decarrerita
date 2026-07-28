@@ -117,11 +117,35 @@ def registrar_contacto(
      
 @router.post("/chofer/registrar-datos")
 def registrar_datos(
+    request: Request,
     id_chofer: int = Form(...),
     banco: str = Form(...),
     numero_cuenta: str = Form(...),
     db: Session = Depends(get_db)
 ):
+    numero_cuenta_limpio = numero_cuenta.strip()
+
+    if not numero_cuenta_limpio.isdigit() or len(numero_cuenta_limpio) != 20:
+        return templates.TemplateResponse(
+            request=request,
+            name="datos_bancarios.html",
+            context={
+                "id_chofer": id_chofer,
+                "error": "El número de cuenta debe contener exactamente 20 dígitos numéricos."
+            }
+        )
+
+    cuenta_existente = db.query(models.DatosBancarios).filter(models.DatosBancarios.numero_cuenta == numero_cuenta_limpio).first()
+    
+    if cuenta_existente:
+        return templates.TemplateResponse(
+            request=request,
+            name="datos_bancarios.html",
+            context={
+                "id_chofer": id_chofer,
+                "error": "Este número de cuenta ya se encuentra registrado en el sistema."
+            }
+        )
     banco_db = db.query(models.Banco).filter(models.Banco.nombre == banco).first()
     
     if not banco_db:
@@ -133,7 +157,7 @@ def registrar_datos(
     nueva_cuenta = models.DatosBancarios(
         id_chofer = id_chofer,
         id_banco = banco_db.id_banco,
-        numero_cuenta = numero_cuenta
+        numero_cuenta = numero_cuenta_limpio
     )
     db.add(nueva_cuenta)
     db.commit()
@@ -143,6 +167,7 @@ def registrar_datos(
 
 @router.post("/chofer/vehiculo")
 def registrar_vehiculo(
+    request: Request,
     placa: str = Form(...),
     marca: str = Form(...),
     modelo: str = Form(...),
@@ -152,6 +177,27 @@ def registrar_vehiculo(
     db: Session = Depends(get_db)
 ):
     matricula_formateada = placa.upper().strip()
+    
+    if not matricula_formateada.isalnum() or len(matricula_formateada) < 6 or len(matricula_formateada) > 7:
+        return templates.TemplateResponse(
+            request=request,
+            name="registro_vehiculo.html",
+            context={
+                "id_chofer": id_chofer,
+                "error": "La placa debe tener entre 6 y 7 caracteres alfanuméricos sin espacios ni guiones."
+            }
+        )
+    vehiculo_existente = db.query(models.Vehiculos).filter(models.Vehiculos.matricula == matricula_formateada).first()
+    
+    if vehiculo_existente:
+        return templates.TemplateResponse(
+            request=request,
+            name="registro_vehiculo.html",
+            context={
+                "id_chofer": id_chofer,
+                "error": f"La placa {matricula_formateada} ya se encuentra registrada en el sistema por otro chofer."
+            }
+        )
     
     nuevo_vehiculo = models.Vehiculos(
         matricula = matricula_formateada,
@@ -174,7 +220,7 @@ def registrar_vehiculo(
         )
         db.add(nueva_revision)
         db.commit()
-        
+
     url_destino = f"/panel-chofer?id_chofer={id_chofer}"
     return RedirectResponse(url=url_destino, status_code=303)
 

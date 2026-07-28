@@ -31,7 +31,12 @@
 
         <!-- TARJETA DEL FORMULARIO -->
         <div class="tarjeta-formulario" style="max-width: 550px;">
-            
+            {% if error %}
+                <div class="alerta-error" style="margin-bottom: 20px; text-align: center;">
+                    <strong>Atención!</strong> {{ error }}
+                </div>
+            {% endif %}
+
             <form action="/chofer/registrar-datos" method="POST">
                 <input type="hidden" name="id_chofer" value="{{ id_chofer }}">
                 
