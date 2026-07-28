@@ -131,7 +131,9 @@ def ver_pagos_pendientes(request: Request, id_admin: int, rol: str = "superadmin
         models.Viajes, models.PagosChoferes.id_viaje == models.Viajes.id_viaje
     ).join(
         models.Usuarios, models.Viajes.id_chofer == models.Usuarios.id_usuario
-    ).filter(...)
+    ).filter(
+        models.PagosChoferes.id_administrador.is_(None)
+    ).all()
     
     return templates.TemplateResponse(
         request=request,

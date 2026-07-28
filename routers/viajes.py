@@ -304,7 +304,9 @@ def finalizar_viaje(
     viaje_db.estado_viaje = models.EstadoViaje.FINALIZADO
     viaje_db.puntuacion_pasajero = calificacion
     viaje_db.puntuacion_chofer = 3
-    
+
+    db.flush()
+
     if pasajero_db:
         viajes_pasajero = db.query(models.Viajes).filter(
             models.Viajes.id_pasajero == viaje_db.id_pasajero, 
@@ -344,6 +346,8 @@ def calificar_viaje_pasajero(
     
     if viaje_db:
         viaje_db.puntuacion_chofer = calificacion
+        db.flush()
+        
         chofer_db = db.query(models.Choferes).filter(models.Choferes.id_chofer == viaje_db.id_chofer).first()
         
         if chofer_db:
