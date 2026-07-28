@@ -6,7 +6,7 @@
 
 {% block body_class %}pantalla-login{% endblock %}
     <div class="escena-3d">
-        <div class="tarjeta-3d" id="tarjeta-login-registro">
+        <div class="tarjeta-3d {% if error_registro %}girada{% endif %}" id="tarjeta-login-registro">
             
             <div class="cara-tarjeta cara-frontal">
             <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 5px;">
@@ -31,9 +31,18 @@
                     </svg>
                 </div>
                 <h2 class="titulo"> Iniciar Sesión </h2>
-                <form action="/login" method="POST">
-                    <input type="email" name="correo" placeholder="Correo Electrónico" required>
-                    <input type="password" name="password" placeholder="Contraseña" required>
+                {% if error %}
+                    <div class="alerta-error" style="margin-bottom: 15px; text-align: center;">
+                        <strong>¡Atención!</strong> {{ error }}
+                    </div>
+                {% endif %}
+                <form action="/login" method="POST" onsubmit="this.querySelector('button').disabled = true; this.querySelector('button').innerText = 'Cargando...';">
+                    <input type="email" name="correo" placeholder="Correo Electrónico" required 
+                            oninvalid="this.setCustomValidity('Por favor, incluye un \'@\' en la dirección de correo.')" 
+                            oninput="this.setCustomValidity('')">
+                    <input type="password" name="password" placeholder="Contraseña" required
+                            oninvalid="this.setCustomValidity('Por favor, ingrese su contraseña.')" 
+                            oninput="this.setCustomValidity('')">
                     <button class="button-inicio" type="submit">Entrar</button>
                 </form>
                 <span class="toggle-link" onclick="cambiarFormulario(event)">¿No tienes cuenta? Regístrate aquí</span>
@@ -41,21 +50,46 @@
 
             <div class="cara-tarjeta cara-trasera">
                 <h2 class="titulo">Registrarse</h2>
-                <form action="/registro" method="POST">
-                    <input type="text" name="nombre" placeholder="Nombre" required>
-                    <input type="text" name="apellido" placeholder="Apellido" required>
-                    <input type="text" name="cedula" placeholder="Cédula" required>
-                    <input type="email" name="correo" placeholder="Correo Electrónico" required>
-                    <input type="password" name="password" placeholder="Contraseña" required>
+                
+                <!-- BLOQUE DE ERROR DE REGISTRO AÑADIDO -->
+                {% if error_registro %}
+                    <div class="alerta-error" style="margin-bottom: 15px; text-align: center;">
+                        <strong>¡Atención!</strong> {{ error_registro }}
+                    </div>
+                {% endif %}
+
+                <form action="/registro" method="POST" onsubmit="this.querySelector('button').disabled = true; this.querySelector('button').innerText = 'Registrando...';">
+                    <input type="text" name="nombre" placeholder="Nombre" required
+                           oninvalid="this.setCustomValidity('Por favor, es necesario que ingreses tu nombre para continuar.')" 
+                           oninput="this.setCustomValidity('')">
+                           
+                    <input type="text" name="apellido" placeholder="Apellido" required
+                           oninvalid="this.setCustomValidity('Por favor, es necesario que ingreses tu apellido para continuar.')" 
+                           oninput="this.setCustomValidity('')">
+                           
+                    <input type="text" name="cedula" placeholder="Cédula (Solo números)" pattern="\d{7,}" required 
+                           oninvalid="this.setCustomValidity('Por favor, ingresa una cédula válida de al menos 7 dígitos.')" 
+                           oninput="this.setCustomValidity('')"
+                           onkeypress="return event.charCode >= 48 && event.charCode <= 57"> 
+                           
+                    <input type="text" name="correo" placeholder="Correo Electrónico" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" required
+                           oninvalid="this.setCustomValidity('Por favor, ingresa un correo electrónico válido que contenga el @.')" 
+                           oninput="this.setCustomValidity('')">
+                           
+                    <input type="password" name="password" placeholder="Contraseña (Mín. 1 mayúscula, 1 número y 1 símbolo)" pattern="(?=^.{6,}$)(?=.*\d)(?=.*[!@#$%^&*]+)(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$" required
+                           oninvalid="this.setCustomValidity('La contraseña debe tener al menos 6 caracteres, una mayúscula, un número y un símbolo.')" 
+                           oninput="this.setCustomValidity('')">
                     
-                    <select name="direccion" required>
-                        <option value="" disabled>Selecciona tu estado</option>
+                    <select name="direccion" required
+                            oninvalid="this.setCustomValidity('Por favor, selecciona tu estado.')" 
+                            onchange="this.setCustomValidity('')">
+                        <option value="" disabled selected>Selecciona tu estado</option>
                         <option value="Amazonas">Amazonas</option>
                         <option value="Anzoátegui">Anzoátegui</option>
                         <option value="Apure">Apure</option>
                         <option value="Aragua">Aragua</option>
                         <option value="Barinas">Barinas</option>
-                        <option value="Bolívar" selected>Bolívar</option>
+                        <option value="Bolívar">Bolívar</option>
                         <option value="Carabobo">Carabobo</option>
                         <option value="Cojedes">Cojedes</option>
                         <option value="Delta Amacuro">Delta Amacuro</option>
@@ -76,7 +110,9 @@
                         <option value="Zulia">Zulia</option>
                     </select>
 
-                    <select name="rol" required>
+                    <select name="rol" required
+                            oninvalid="this.setCustomValidity('Por favor, selecciona un rol.')" 
+                            onchange="this.setCustomValidity('')">
                         <option value="" disabled selected>Selecciona un rol</option>
                         <option value="cliente">Pasajero</option>
                         <option value="chofer">Chofer</option>
