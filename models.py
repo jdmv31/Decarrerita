@@ -119,6 +119,6 @@ class Usuarios(Base):
     apellido = Column(String, nullable = False)
     direccion = Column(String, nullable = False)
     rol = Column(String, nullable = False)
-    cedula = Column(Integer,unique = True, nullable = False)
+    cedula = Column(Integer, nullable = False)
     correo = Column(String, unique = True, nullable = False)
     password = Column(String, nullable = False)
