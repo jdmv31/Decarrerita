@@ -170,9 +170,15 @@ def procesar_pago_chofer(
     ref_limpia = numero_referencia.strip()
     error_msg = None
 
+    if id_admin == 0:
+        admin_salvavidas = db.query(models.Usuarios).filter(models.Usuarios.rol == 'superadmin').first()
+        if admin_salvavidas:
+            id_admin = admin_salvavidas.id_usuario
+
     if not ref_limpia.isdigit() or len(ref_limpia) != 10:
         error_msg = "El número de referencia debe contener exactamente 10 dígitos numéricos."
     else:
+        # 2. Validación de duplicidad en la tabla PagosChoferes
         referencia_existente = db.query(models.PagosChoferes).filter(models.PagosChoferes.numero_referencia == ref_limpia).first()
         if referencia_existente:
             error_msg = "Esta referencia de pago ya se encuentra registrada en el sistema."
@@ -209,9 +215,10 @@ def procesar_pago_chofer(
                 "pagos": pagos_con_cuentas,
                 "rol": rol_admin,
                 "id_admin": id_admin,
-                "error": error_msg
+                "error": error_msg 
             }
         )
+
     pago_db = db.query(models.PagosChoferes).filter(models.PagosChoferes.id_pago == id_pago).first()
     
     if pago_db:
@@ -307,14 +314,18 @@ def historial_pagos_ganancias(
     chofer_id: str = None,
     db: Session = Depends(get_db)
 ):
-    query = db.query(models.Viajes, models.Usuarios, models.PagosChoferes).join(
+    query = db.query(models.Viajes, models.Usuarios, models.PagosChoferes, models.DatosBancarios, models.Banco).join(
         models.Usuarios, models.Viajes.id_chofer == models.Usuarios.id_usuario
     ).outerjoin(
         models.PagosChoferes, models.Viajes.id_viaje == models.PagosChoferes.id_viaje
+    ).outerjoin(
+        models.DatosBancarios, models.PagosChoferes.id_datos == models.DatosBancarios.id_datos
+    ).outerjoin(
+        models.Banco, models.DatosBancarios.id_banco == models.Banco.id_banco
     ).filter(
         models.Viajes.estado_viaje.in_([models.EstadoViaje.FINALIZADO, models.EstadoViaje.CANCELADO])
     )
-
+    
     if fecha_inicio and fecha_inicio.strip() != "":
         fecha_ini_date = datetime.strptime(fecha_inicio, "%Y-%m-%d").date()
         query = query.filter(models.Viajes.fecha_viaje >= fecha_ini_date)
@@ -333,7 +344,7 @@ def historial_pagos_ganancias(
     total_pagado = 0.0
     total_ganancia_empresa = 0.0
     
-    for viaje, usuario, pago in todos_los_registros:
+    for viaje, usuario, pago, cuenta, banco in todos_los_registros:
         if viaje.estado_viaje == models.EstadoViaje.CANCELADO:
             estado = "CANCELADO"
             pago_chofer = 0.0
@@ -356,6 +367,8 @@ def historial_pagos_ganancias(
             "viaje": viaje,
             "usuario": usuario,
             "pago": pago,
+            "cuenta": cuenta, 
+            "banco": banco, 
             "pago_chofer": round(pago_chofer, 2),
             "ganancia_empresa": round(ganancia_empresa, 2),
             "estado": estado

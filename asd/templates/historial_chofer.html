@@ -1,6 +1,6 @@
-{% extends "base.html" %} 
+{% extends "base.html" %}
 
-{% block title %}Mis Ganancias - Decarrerita{% endblock %} 
+{% block title %}Mis Ganancias - Decarrerita{% endblock %}
 
 {% block content %}
 <div class="dashboard-container">
@@ -13,9 +13,8 @@
             </div>
             <h1>Mis Viajes</h1>
         </div>
-
         <nav class="menu-lateral">
-            <a href="/panel-chofer?id_chofer={{ id_chofer }}" class="menu-item">⬅ Volver al Panel</a>
+            <a href="/panel-chofer?id_chofer={{ id_chofer }}" class="menu-item">🔙 Volver al Panel</a>
         </nav>
     </aside>
 
@@ -63,7 +62,7 @@
         <!-- TABLA UNIFICADA: TODOS LOS VIAJES -->
         <div class="tarjeta-formulario" style="max-width: 100%; margin-bottom: 30px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <h3 style="color: #052659; margin: 0;">🏁 Historial de Viajes</h3>
+                <h3 style="color: #052659; margin: 0;">📜 Historial de Viajes</h3>
                 
                 <!-- Botoncitos de filtrado rápido -->
                 <div style="display: flex; gap: 8px;">
@@ -116,7 +115,7 @@
                                         ${{ item.ganancia }}
                                     </td>
                                 {% endif %}
-
+                                
                                 <td>
                                     {% if item.estado == 'CANCELADO' %}
                                         <span style="color: #dc3545; font-weight: bold;">Cancelado</span>
@@ -128,7 +127,12 @@
                                 </td>
                                 <td>
                                     {% if item.estado == 'PAGADO' %}
-                                        <span style="font-size: 0.9em; color: #555;">Ref: <strong>{{ item.pago.numero_referencia }}</strong></span><br>
+                                        <span style="font-size: 0.9em; color: #555;">
+                                            {% if item.banco %}
+                                                <strong>{{ item.banco.nombre }}</strong> (*{{ item.cuenta.numero_cuenta[-4:] }})<br>
+                                            {% endif %}
+                                            Ref: <strong>{{ item.pago.numero_referencia }}</strong>
+                                        </span><br>
                                         <small style="color: #888;">{{ item.pago.fecha_pago }}</small>
                                     {% elif item.estado == 'CANCELADO' %}
                                         <span style="color: #999; font-size: 0.9em;">N/A</span>

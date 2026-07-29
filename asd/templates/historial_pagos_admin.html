@@ -14,7 +14,7 @@
             <h1>Historial</h1>
         </div>
         <nav class="menu-lateral">
-            <a href="/panel-administracion?rol={{ rol }}&id_admin={{ id_admin }}" class="menu-item">⬅ Volver al Panel</a>
+            <a href="/panel-administracion?rol={{ rol }}&id_admin={{ id_admin }}" class="menu-item">🔙 Volver al Panel</a>
         </nav>
     </aside>
 
@@ -76,7 +76,7 @@
 
         <!-- TABLA UNIFICADA SIN CSS EXTERNO -->
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-            <h3 style="color: #052659; margin: 0;">📋 Registro de Operaciones</h3>
+            <h3 style="color: #052659; margin: 0;">📊 Registro de Operaciones</h3>
             
             <div style="display: flex; gap: 8px;">
                 <button type="button" onclick="filtrarTabla('TODOS', this)" class="btn-filtro active" style="padding: 5px 12px; font-size: 0.85em; border-radius: 20px; border: 1px solid #052659; background-color: #052659; color: white; cursor: pointer; transition: 0.2s;">Todos</button>
@@ -95,6 +95,7 @@
                     <th>Costo Viaje</th>
                     <th>Ganancia Chofer (70%)</th>
                     <th>Ganancia Empresa (30%)</th>
+                    <th>Detalles de Pago</th>
                 </tr>
             </thead>
             <tbody>
@@ -119,6 +120,22 @@
                     {% else %}
                         <td style="color: #16a34a; font-weight: bold;">+${{ item.ganancia_empresa }}</td>
                     {% endif %}
+                    
+                    <!-- NUEVA CELDA: Detalles de pago -->
+                    <td>
+                        {% if item.estado == 'PAGADO' %}
+                            <span style="font-size: 0.9em; color: #555;">
+                                {% if item.banco %}
+                                    <strong>{{ item.banco.nombre }}</strong> (*{{ item.cuenta.numero_cuenta[-4:] }})<br>
+                                {% endif %}
+                                Ref: {{ item.pago.numero_referencia }}
+                            </span>
+                        {% elif item.estado == 'CANCELADO' %}
+                            <span style="color: #999; font-size: 0.9em;">N/A</span>
+                        {% else %}
+                            <span style="color: #f59e0b; font-size: 0.9em;">Pendiente</span>
+                        {% endif %}
+                    </td>
                 </tr>
                 {% else %}
                 <tr class="fila-historial" data-estado="TODOS">

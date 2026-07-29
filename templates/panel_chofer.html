@@ -30,15 +30,13 @@
         </header>
 
         <div style="max-width: 1000px;">
-
-            <!-- ESTADO DE LA EVALUACIÓN (CUENTA EN REVISIÓN) -->
-            {% if puntuacion < 73 %}
+            {% if puntuacion == 0 %}
                 <div class="alerta-warning" style="margin-bottom: 30px;">
                     <h3 style="margin-top: 0; color: #b45309;">⏳ Cuenta en Revisión</h3>
                     <p style="margin-bottom: 5px;">Tu cuenta fue creada exitosamente. Para continuar con tu registro, un administrador debe aprobar tu evaluación psicológica (Nota mínima: 73).</p>
-                    <p class="texto-negrita">Tu puntuación actual es: {{ puntuacion }}/100</p>
+                    <p class="texto-negrita">Tu puntuación actual es: En espera de evaluación</p>
                 </div>
-                
+                                 
                 <h3 class="titulo-seccion-admin">Datos Personales</h3>
                 <div class="grid-modulos" style="grid-template-columns: 1fr; max-width: 400px;">
                     <a href="/chofer/perfil?id_chofer={{ id_chofer }}" class="tarjeta-modulo azul">
@@ -49,7 +47,24 @@
                         </div>
                     </a>
                 </div>
-                
+
+            {% elif puntuacion < 73 %}
+                <div class="alerta-error" style="margin-bottom: 30px; background-color: #fef2f2; border: 1px solid #fecaca; color: #991b1b;">
+                    <h3 style="margin-top: 0; color: #dc3545;">❌ No Cumples con los Requisitos</h3>
+                    <p style="margin-bottom: 5px;">Lo sentimos, no cumples con los requisitos mínimos para formar parte de nuestro servicio de choferes tras no alcanzar la puntuación requerida en la evaluación psicológica (Nota mínima: 73).</p>
+                    <p class="texto-negrita">Tu puntuación obtenida fue: {{ puntuacion }}/100</p>
+                </div>
+                                 
+                <h3 class="titulo-seccion-admin">Datos Personales</h3>
+                <div class="grid-modulos" style="grid-template-columns: 1fr; max-width: 400px;">
+                    <a href="/chofer/perfil?id_chofer={{ id_chofer }}" class="tarjeta-modulo azul">
+                        <div class="icono-modulo">👤</div>
+                        <div class="info-modulo">
+                            <h4>Ver Mis Datos</h4>
+                            <p>Consulta la información básica de tu registro.</p>
+                        </div>
+                    </a>
+                </div>
             {% else %}
             <!-- ESTADO DE LA EVALUACIÓN (APROBADO) -->
                 <div class="alerta-success" style="background-color: #dcfce7; border: 1px solid #bbf7d0; color: #166534; padding: 15px; border-radius: 12px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center;">

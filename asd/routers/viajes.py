@@ -35,15 +35,19 @@ def historial_traslados_chofer(
     fecha_fin: str = None,
     db: Session = Depends(get_db)
 ):
-    query = db.query(models.Viajes, models.Usuarios, models.PagosChoferes).join(
+    query = db.query(models.Viajes, models.Usuarios, models.PagosChoferes, models.DatosBancarios, models.Banco).join(
         models.Usuarios, models.Viajes.id_pasajero == models.Usuarios.id_usuario
     ).outerjoin(
         models.PagosChoferes, models.Viajes.id_viaje == models.PagosChoferes.id_viaje
+    ).outerjoin(
+        models.DatosBancarios, models.PagosChoferes.id_datos == models.DatosBancarios.id_datos
+    ).outerjoin(
+        models.Banco, models.DatosBancarios.id_banco == models.Banco.id_banco
     ).filter(
         models.Viajes.id_chofer == id_chofer,
         models.Viajes.estado_viaje.in_([models.EstadoViaje.FINALIZADO, models.EstadoViaje.CANCELADO])
     )
-
+    
     if fecha_inicio and fecha_inicio.strip() != "":
         fecha_ini_date = datetime.strptime(fecha_inicio, "%Y-%m-%d").date()
         query = query.filter(models.Viajes.fecha_viaje >= fecha_ini_date)
@@ -53,12 +57,11 @@ def historial_traslados_chofer(
         query = query.filter(models.Viajes.fecha_viaje <= fecha_fin_date)
         
     viajes_db = query.order_by(models.Viajes.fecha_viaje.desc()).all()
-
     todos_los_viajes = []
     total_ganado = 0.0
     total_pendiente = 0.0
-
-    for viaje, pasajero, pago in viajes_db:
+    
+    for viaje, pasajero, pago, cuenta, banco in viajes_db:
         if viaje.estado_viaje == models.EstadoViaje.CANCELADO:
             ganancia = 0.0
             estado = "CANCELADO"
@@ -70,16 +73,18 @@ def historial_traslados_chofer(
             else:
                 estado = "PENDIENTE"
                 total_pendiente += ganancia
-
+                
         item = {
             "viaje": viaje,
             "pasajero": pasajero,
             "pago": pago,
+            "cuenta": cuenta,
+            "banco": banco,  
             "ganancia": ganancia,
             "estado": estado
         }
         todos_los_viajes.append(item)
-
+        
     return templates.TemplateResponse(
         request=request,
         name="historial_chofer.html",

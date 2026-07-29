@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Request, Form, Depends
 from fastapi.responses import RedirectResponse
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session,aliased
 from datetime import datetime, date, timedelta
 import models
 from dependencies import get_db, templates
@@ -21,7 +21,12 @@ def panel_administracion(request: Request, rol: str, id_admin: int = 0):
     )
 
 @router.get("/administracion/evaluacion")
-def evaluaciones_psicologicas(request: Request, db: Session = Depends(get_db)):
+def evaluaciones_psicologicas(
+    request: Request, 
+    rol: str, 
+    id_admin: int, 
+    db: Session = Depends(get_db)
+):
     evaluaciones_db = db.query(models.Usuarios, models.EvaluacionChofer).join(
         models.EvaluacionChofer, models.Usuarios.id_usuario == models.EvaluacionChofer.id_chofer
     ).filter(models.EvaluacionChofer.puntuacion == 0).all()
@@ -29,23 +34,35 @@ def evaluaciones_psicologicas(request: Request, db: Session = Depends(get_db)):
     return templates.TemplateResponse(
         request = request,
         name = "evaluaciones_psicologicas.html",
-        context = {"evaluaciones": evaluaciones_db}
+        context = {
+            "evaluaciones": evaluaciones_db,
+            "rol": rol,
+            "id_admin": id_admin
+        }
     )
 
 @router.post("/administracion/evaluacion/guardar")
 def guardar_calificacion(
     id_evaluacion: int = Form(...),
     puntuacion: int = Form(...),
+    rol: str = Form(...),         
+    id_admin: int = Form(...),   
     db: Session = Depends(get_db)
 ):
     evaluacion_db = db.query(models.EvaluacionChofer).filter(models.EvaluacionChofer.id_evaluacion == id_evaluacion).first()
     if evaluacion_db:
         evaluacion_db.puntuacion = puntuacion
         db.commit()
-    return RedirectResponse(url="/administracion/evaluacion", status_code=303)
+
+    return RedirectResponse(url=f"/administracion/evaluacion?rol={rol}&id_admin={id_admin}", status_code=303)
 
 @router.get("/administracion/revision")
-def revisiones_vehiculares(request: Request, db: Session = Depends(get_db)):
+def revisiones_vehiculares(
+    request: Request, 
+    rol: str, 
+    id_admin: int, 
+    db: Session = Depends(get_db)
+):
     revisiones_db = db.query(models.Vehiculos, models.RevisionVehiculo).join(
         models.RevisionVehiculo, models.Vehiculos.matricula == models.RevisionVehiculo.id_vehiculo
     ).filter(models.RevisionVehiculo.puntuacion == 0.0).all()
@@ -53,7 +70,11 @@ def revisiones_vehiculares(request: Request, db: Session = Depends(get_db)):
     return templates.TemplateResponse(
         request = request,
         name = "revisiones_vehiculares.html",
-        context = {"revisiones": revisiones_db}
+        context = {
+            "revisiones": revisiones_db,
+            "rol": rol,
+            "id_admin": id_admin
+        }
     )
 
 @router.get("/administracion/revisiones-vencimiento")
@@ -98,6 +119,8 @@ def revisiones_por_vencer(request: Request, rol: str, id_admin: int, db: Session
 def guardar_revision_vehiculo(
     id_revision: int = Form(...),
     puntuacion: float = Form(...),
+    rol: str = Form(...),
+    id_admin: int = Form(...),
     db: Session = Depends(get_db)
 ):
     revision_db = db.query(models.RevisionVehiculo).filter(models.RevisionVehiculo.id_revision == id_revision).first()
@@ -105,7 +128,7 @@ def guardar_revision_vehiculo(
         revision_db.puntuacion = puntuacion
         revision_db.fecha_revision = datetime.now().date()
         db.commit()
-    return RedirectResponse(url="/administracion/revision", status_code=303)
+    return RedirectResponse(url=f"/administracion/revision?rol={rol}&id_admin={id_admin}", status_code=303)
 
 @router.get("/administracion/choferes")
 def choferes_registrados(request: Request, rol: str, db: Session = Depends(get_db)):
@@ -260,6 +283,7 @@ def pasajeros_registrados(request: Request, rol: str, db: Session = Depends(get_
 
 @router.post("/administracion/administradores/agregar")
 def agregar_administrador(
+    request: Request,
     nombre: str = Form(...),
     apellido: str = Form(...),
     direccion: str = Form(...),
@@ -271,24 +295,70 @@ def agregar_administrador(
     id_admin: int = Form(0),
     db: Session = Depends(get_db)
 ):
-    rol = rol.lower().strip()
-    
-    usuario_existente = db.query(models.Usuarios).filter(
-        (models.Usuarios.cedula == cedula) | (models.Usuarios.correo == correo.lower().strip())
+    rol_limpio = rol.lower().strip()
+    correo_limpio = correo.lower().strip()
+
+    if cedula > 2147483647:
+        return templates.TemplateResponse(
+            request=request,
+            name="administrador.html",
+            context={
+                "rol": rol_creador,
+                "id_admin": id_admin,
+                "error": "El número de cédula ingresado es demasiado largo."
+            }
+        )
+
+    correo_existente = db.query(models.Usuarios).filter(models.Usuarios.correo == correo_limpio).first()
+    if correo_existente:
+        return templates.TemplateResponse(
+            request=request,
+            name="administrador.html",
+            context={
+                "rol": rol_creador,
+                "id_admin": id_admin,
+                "error": "Este correo electrónico ya está en uso por otra cuenta en el sistema."
+            }
+        )
+
+    admin_con_misma_cedula = db.query(models.Usuarios).filter(
+        models.Usuarios.cedula == cedula,
+        models.Usuarios.rol.in_(["admin", "superadmin"])
     ).first()
     
-    if not usuario_existente:
-        nuevo_admin = models.Usuarios(
-            nombre = nombre.title().strip(),
-            apellido = apellido.title().strip(),
-            cedula = cedula,
-            correo = correo.lower().strip(),
-            password = password.strip(),
-            rol = rol,
-            direccion = direccion.strip()
+    if admin_con_misma_cedula:
+        return templates.TemplateResponse(
+            request=request,
+            name="administrador.html",
+            context={
+                "rol": rol_creador,
+                "id_admin": id_admin,
+                "error": f"La cédula {cedula} ya pertenece a un miembro del personal administrativo."
+            }
         )
-        db.add(nuevo_admin)
-        db.commit()
+
+    usuarios_misma_cedula = db.query(models.Usuarios).filter(models.Usuarios.cedula == cedula).all()
+    if usuarios_misma_cedula:
+        usuario_base = usuarios_misma_cedula[0]
+        nombre_final = usuario_base.nombre
+        apellido_final = usuario_base.apellido
+        direccion_final = usuario_base.direccion
+    else:
+        nombre_final = nombre.title().strip()
+        apellido_final = apellido.title().strip()
+        direccion_final = direccion.strip()
+
+    nuevo_admin = models.Usuarios(
+        nombre = nombre_final,
+        apellido = apellido_final,
+        cedula = cedula,
+        correo = correo_limpio,
+        password = password.strip(),
+        rol = rol_limpio,
+        direccion = direccion_final
+    )
+    db.add(nuevo_admin)
+    db.commit()
         
     url_destino = f"/administracion/personal?rol={rol_creador}&id_admin={id_admin}"
     return RedirectResponse(url = url_destino, status_code=303)
@@ -314,7 +384,16 @@ def historial_pagos_ganancias(
     chofer_id: str = None,
     db: Session = Depends(get_db)
 ):
-    query = db.query(models.Viajes, models.Usuarios, models.PagosChoferes, models.DatosBancarios, models.Banco).join(
+    AdminUsuario = aliased(models.Usuarios)
+    
+    query = db.query(
+        models.Viajes, 
+        models.Usuarios, 
+        models.PagosChoferes, 
+        models.DatosBancarios, 
+        models.Banco, 
+        AdminUsuario
+    ).join(
         models.Usuarios, models.Viajes.id_chofer == models.Usuarios.id_usuario
     ).outerjoin(
         models.PagosChoferes, models.Viajes.id_viaje == models.PagosChoferes.id_viaje
@@ -322,6 +401,8 @@ def historial_pagos_ganancias(
         models.DatosBancarios, models.PagosChoferes.id_datos == models.DatosBancarios.id_datos
     ).outerjoin(
         models.Banco, models.DatosBancarios.id_banco == models.Banco.id_banco
+    ).outerjoin(
+        AdminUsuario, models.PagosChoferes.id_administrador == AdminUsuario.id_usuario # Usamos el alias aquí
     ).filter(
         models.Viajes.estado_viaje.in_([models.EstadoViaje.FINALIZADO, models.EstadoViaje.CANCELADO])
     )
@@ -329,22 +410,22 @@ def historial_pagos_ganancias(
     if fecha_inicio and fecha_inicio.strip() != "":
         fecha_ini_date = datetime.strptime(fecha_inicio, "%Y-%m-%d").date()
         query = query.filter(models.Viajes.fecha_viaje >= fecha_ini_date)
-        
+              
     if fecha_fin and fecha_fin.strip() != "":
         fecha_fin_date = datetime.strptime(fecha_fin, "%Y-%m-%d").date()
         query = query.filter(models.Viajes.fecha_viaje <= fecha_fin_date)
-        
+              
     if chofer_id and chofer_id.strip() != "":
         query = query.filter(models.Viajes.id_chofer == int(chofer_id))
-        
+              
     todos_los_registros = query.order_by(models.Viajes.fecha_viaje.desc()).all()
-    
+          
     viajes_unificados = []
     total_viajes = 0.0
     total_pagado = 0.0
     total_ganancia_empresa = 0.0
-    
-    for viaje, usuario, pago, cuenta, banco in todos_los_registros:
+          
+    for viaje, usuario, pago, cuenta, banco, admin_obj in todos_los_registros:
         if viaje.estado_viaje == models.EstadoViaje.CANCELADO:
             estado = "CANCELADO"
             pago_chofer = 0.0
@@ -362,20 +443,21 @@ def historial_pagos_ganancias(
                 pago_chofer = viaje.costo_viaje * 0.70
                 ganancia_empresa = viaje.costo_viaje * 0.30
                 total_ganancia_empresa += ganancia_empresa
-                
+                          
         viajes_unificados.append({
             "viaje": viaje,
             "usuario": usuario,
             "pago": pago,
-            "cuenta": cuenta, 
-            "banco": banco, 
+            "cuenta": cuenta,
+            "banco": banco,
+            "admin": admin_obj,
             "pago_chofer": round(pago_chofer, 2),
             "ganancia_empresa": round(ganancia_empresa, 2),
             "estado": estado
         })
-        
+              
     choferes_lista = db.query(models.Usuarios).filter(models.Usuarios.rol == 'chofer').all()
-    
+          
     return templates.TemplateResponse(
         request=request,
         name="historial_pagos_admin.html",
@@ -392,7 +474,6 @@ def historial_pagos_ganancias(
             "chofer_id": int(chofer_id) if chofer_id and chofer_id.isdigit() else None
         }
     )
-
 @router.get("/administracion/personal")
 def ver_personal(request: Request, rol: str, id_admin: int, db: Session = Depends(get_db)):
     if rol != "superadmin":
