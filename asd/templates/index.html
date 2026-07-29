@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block title %}Decarrerita - Inicio{% endblock %}
+
+{% block content %}
+
+{% block body_class %}pantalla-login{% endblock %}
+    <div class="escena-3d">
+        <div class="tarjeta-3d {% if error_registro %}girada{% endif %}" id="tarjeta-login-registro">
+            
+            <div class="cara-tarjeta cara-frontal">
+            <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 5px;">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 230 50" width="700" height="150">
+                         <defs>
+                            <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#052659" />
+                                <stop offset="100%" stop-color="#5483B3" />
+                            </linearGradient>
+                            <linearGradient id="textoGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" stop-color="#052659" /> 
+                                <stop offset="100%" stop-color="#7DA0CA" /> 
+                            </linearGradient>
+                        </defs>
+        
+                        <g transform="translate(15, 5)">
+                            <path d="M20,0 C8.95,0 0,8.95 0,20 C0,35 20,40 20,40 C20,40 40,35 40,20 C40,8.95 31.05,0 20,0 Z M20,13 A7,7 0 1,1 20,27 A7,7 0 1,1 20,13 Z" fill="url(#logoGrad)"/>
+                            <path d="M-10,12 L2,12 M-18,20 L-4,20 M-10,28 L5,28" stroke="#ffffff" stroke-width="3" stroke-linecap="round" opacity="0.9"/>
+                        </g>
+        
+                        <text x="65" y="33" font-family="'Segoe UI', Roboto, sans-serif" font-size="26" font-weight="900" fill="#ffffff" letter-spacing="-1">De<tspan fill="url(#textoGrad)">carrerita</tspan></text>
+                    </svg>
+                </div>
+                <h2 class="titulo"> Iniciar Sesión </h2>
+                {% if error %}
+                    <div class="alerta-error" style="margin-bottom: 15px; text-align: center;">
+                        <strong>¡Atención!</strong> {{ error }}
+                    </div>
+                {% endif %}
+                <form action="/login" method="POST" onsubmit="this.querySelector('button').disabled = true; this.querySelector('button').innerText = 'Cargando...';">
+                    <input type="email" name="correo" placeholder="Correo Electrónico" required 
+                            oninvalid="this.setCustomValidity('Por favor, incluye un \'@\' en la dirección de correo.')" 
+                            oninput="this.setCustomValidity('')">
+                    <input type="password" name="password" placeholder="Contraseña" required
+                            oninvalid="this.setCustomValidity('Por favor, ingrese su contraseña.')" 
+                            oninput="this.setCustomValidity('')">
+                    <button class="button-inicio" type="submit">Entrar</button>
+                </form>
+                <span class="toggle-link" onclick="cambiarFormulario(event)">¿No tienes cuenta? Regístrate aquí</span>
+            </div>
+
+            <div class="cara-tarjeta cara-trasera">
+                <h2 class="titulo">Registrarse</h2>
+                
+                <!-- BLOQUE DE ERROR DE REGISTRO AÑADIDO -->
+                {% if error_registro %}
+                    <div class="alerta-error" style="margin-bottom: 15px; text-align: center;">
+                        <strong>¡Atención!</strong> {{ error_registro }}
+                    </div>
+                {% endif %}
+
+                <form action="/registro" method="POST" onsubmit="this.querySelector('button').disabled = true; this.querySelector('button').innerText = 'Registrando...';">
+                    <input type="text" name="nombre" placeholder="Nombre" required
+                           oninvalid="this.setCustomValidity('Por favor, es necesario que ingreses tu nombre para continuar.')" 
+                           oninput="this.setCustomValidity('')">
+                           
+                    <input type="text" name="apellido" placeholder="Apellido" required
+                           oninvalid="this.setCustomValidity('Por favor, es necesario que ingreses tu apellido para continuar.')" 
+                           oninput="this.setCustomValidity('')">
+                           
+                    <input type="text" name="cedula" placeholder="Cédula (Solo números)" pattern="\d{7,}" required 
+                           oninvalid="this.setCustomValidity('Por favor, ingresa una cédula válida de al menos 7 dígitos.')" 
+                           oninput="this.setCustomValidity('')"
+                           onkeypress="return event.charCode >= 48 && event.charCode <= 57"> 
+                           
+                    <input type="text" name="correo" placeholder="Correo Electrónico" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" required
+                           oninvalid="this.setCustomValidity('Por favor, ingresa un correo electrónico válido que contenga el @.')" 
+                           oninput="this.setCustomValidity('')">
+                           
+                    <input type="password" name="password" placeholder="Contraseña (Mín. 1 mayúscula, 1 número y 1 símbolo)" pattern="(?=^.{6,}$)(?=.*\d)(?=.*[!@#$%^&*]+)(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$" required
+                           oninvalid="this.setCustomValidity('La contraseña debe tener al menos 6 caracteres, una mayúscula, un número y un símbolo.')" 
+                           oninput="this.setCustomValidity('')">
+                    
+                    <select name="direccion" required
+                            oninvalid="this.setCustomValidity('Por favor, selecciona tu estado.')" 
+                            onchange="this.setCustomValidity('')">
+                        <option value="" disabled selected>Selecciona tu estado</option>
+                        <option value="Amazonas">Amazonas</option>
+                        <option value="Anzoátegui">Anzoátegui</option>
+                        <option value="Apure">Apure</option>
+                        <option value="Aragua">Aragua</option>
+                        <option value="Barinas">Barinas</option>
+                        <option value="Bolívar">Bolívar</option>
+                        <option value="Carabobo">Carabobo</option>
+                        <option value="Cojedes">Cojedes</option>
+                        <option value="Delta Amacuro">Delta Amacuro</option>
+                        <option value="Distrito Capital">Distrito Capital</option>
+                        <option value="Falcón">Falcón</option>
+                        <option value="Guárico">Guárico</option>
+                        <option value="Lara">Lara</option>
+                        <option value="Mérida">Mérida</option>
+                        <option value="Miranda">Miranda</option>
+                        <option value="Monagas">Monagas</option>
+                        <option value="Nueva Esparta">Nueva Esparta</option>
+                        <option value="Portuguesa">Portuguesa</option>
+                        <option value="Sucre">Sucre</option>
+                        <option value="Táchira">Táchira</option>
+                        <option value="Trujillo">Trujillo</option>
+                        <option value="La Guaira">La Guaira</option>
+                        <option value="Yaracuy">Yaracuy</option>
+                        <option value="Zulia">Zulia</option>
+                    </select>
+
+                    <select name="rol" required
+                            oninvalid="this.setCustomValidity('Por favor, selecciona un rol.')" 
+                            onchange="this.setCustomValidity('')">
+                        <option value="" disabled selected>Selecciona un rol</option>
+                        <option value="cliente">Pasajero</option>
+                        <option value="chofer">Chofer</option>
+                    </select>
+                    
+                    <button class="button-inicio" type="submit">Crear Cuenta</button>
+                </form>
+                <span class="toggle-link" onclick="cambiarFormulario(event)">¿Ya tienes cuenta? Inicia sesión aquí</span>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        function cambiarFormulario(event) {
+        // Esto evita que el navegador intente hacer otra cosa (como recargar la página)
+            if(event) event.preventDefault();
+
+        // Buscamos la tarjeta
+            const tarjeta = document.getElementById('tarjeta-login-registro');
+        
+        // Verificamos si realmente la encontró antes de intentar girarla
+            if (tarjeta) {
+                tarjeta.classList.toggle('girada');
+                console.log("¡El Javascript funcionó! Se aplicó la clase 'girada'.");
+            } else {
+                console.error("Fallo de JS: No se encontró el elemento con ID 'tarjeta-login-registro'.");
+            }
+        }
+    </script>
+
+{% endblock %}

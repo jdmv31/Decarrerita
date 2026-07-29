@@ -1,0 +1,116 @@
+{% extends "base.html" %} 
+
+{% block title %}Panel de Administración - Decarrerita{% endblock %} 
+
+{% block content %}
+<div class="dashboard-container">
+    
+    <!-- PANEL LATERAL -->
+    <aside class="panel-izquierdo">
+        <div class="perfil-header">
+            <div class="avatar-placeholder">
+                <img src="{{ url_for('static', path='images/usuario.png') }}" alt="Admin">
+            </div>
+            <div>
+                <h1>Panel Admin</h1>
+                <span style="color: rgba(255,255,255,0.7); font-size: 0.9em; text-transform: capitalize;">
+                    {{ rol }}
+                </span>
+            </div>
+        </div>
+        
+        <nav class="menu-lateral">
+            <a href="/" class="btn-cerrar">← Cerrar Sesión</a>
+        </nav>
+    </aside>
+
+    <!-- ÁREA PRINCIPAL -->
+    <main class="panel-derecho" style="overflow-y: auto;">
+        
+        <header class="header-principal">
+            <h2>Centro de Control</h2>
+            <p>Selecciona el módulo al que deseas acceder para gestionar la plataforma.</p>
+        </header>
+
+        <div style="max-width: 1000px;">
+            
+            <!-- SECCIÓN 1: FINANZAS -->
+            <h3 class="titulo-seccion-admin">Finanzas y Pagos</h3>
+            <div class="grid-modulos">
+                {% if rol == 'superadmin' %}
+                    <a href="/administracion/pagos?rol={{ rol }}&id_admin={{ id_admin }}" class="tarjeta-modulo verde">
+                        <div class="icono-modulo">💸</div>
+                        <div class="info-modulo">
+                            <h4>Liquidar Pagos</h4>
+                            <p>Procesa los pagos pendientes a los choferes y registra transacciones.</p>
+                        </div>
+                    </a>
+                {% endif %}
+                
+                <a href="/administracion/historial-pagos?rol={{ rol }}&id_admin={{ id_admin }}" class="tarjeta-modulo azul">
+                    <div class="icono-modulo">📊</div>
+                    <div class="info-modulo">
+                        <h4>Historial y Ganancias</h4>
+                        <p>Consulta los ingresos totales, pagos realizados y comisiones retenidas.</p>
+                    </div>
+                </a>
+            </div>
+
+            <!-- SECCIÓN 2: OPERACIONES -->
+            <h3 class="titulo-seccion-admin">Gestión Operativa</h3>
+            <div class="grid-modulos">
+                {% if rol == 'superadmin' %}
+                    <a href="/administracion/personal?rol={{ rol }}&id_admin={{ id_admin }}" class="tarjeta-modulo azul">
+                        <div class="icono-modulo">👥</div>
+                        <div class="info-modulo">
+                            <h4>Gestionar Personal</h4>
+                            <p>Agrega, edita o elimina cuentas de administradores y consultores.</p>
+                        </div>
+                    </a>
+                {% endif %}
+                
+                <a href="/administracion/choferes?rol={{rol}}" class="tarjeta-modulo azul">
+                    <div class="icono-modulo">🚕</div>
+                    <div class="info-modulo">
+                        <h4>Choferes Registrados</h4>
+                        <p>Revisa el listado completo de conductores y sus calificaciones actuales.</p>
+                    </div>
+                </a>
+                
+                <a href="/administracion/pasajeros?rol={{rol}}" class="tarjeta-modulo azul">
+                    <div class="icono-modulo">📱</div>
+                    <div class="info-modulo">
+                        <h4>Pasajeros Registrados</h4>
+                        <p>Accede a la base de datos de los usuarios registrados en el sistema.</p>
+                    </div>
+                </a>
+
+                <a href="/administracion/evaluacion" class="tarjeta-modulo azul">
+                    <div class="icono-modulo">🧠</div>
+                    <div class="info-modulo">
+                        <h4>Evaluaciones Psicológicas</h4>
+                        <p>Supervisa el estado y resultados de las pruebas de los choferes.</p>
+                    </div>
+                </a>
+                
+                <a href="/administracion/revision" class="tarjeta-modulo azul">
+                    <div class="icono-modulo">🔧</div>
+                    <div class="info-modulo">
+                        <h4>Revisiones Vehiculares</h4>
+                        <p>Controla el estatus mecánico e inspecciones de los vehículos activos.</p>
+                    </div>
+                </a>
+                
+                <a href="/administracion/revisiones-vencimiento?rol={{ rol }}&id_admin={{ id_admin }}" class="tarjeta-modulo roja">
+                    <div class="icono-modulo">⚠️</div>
+                    <div class="info-modulo">
+                        <h4>Vehículos por Vencer</h4>
+                        <p>Alertas de unidades cuya revisión técnica está próxima a caducar.</p>
+                    </div>
+                </a>
+            </div>
+
+        </div>
+    </main>
+</div>
+{% endblock %}

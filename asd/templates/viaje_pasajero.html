@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}Estado de tu Viaje - Decarrerita{% endblock %}
+
+{% block content %}
+<!-- modal-overlay cubre toda la pantalla. Forzamos display: flex para que sea visible de inmediato -->
+<div class="modal-overlay" style="display: flex;">
+    
+    <!-- modal-contenido crea la tarjeta blanca centrada, redondeada y con sombras -->
+    <div class="modal-contenido" style="max-width: 500px; text-align: center;">
+        
+        {% if viaje.estado_viaje.name == "EN_ESPERA" %}
+            <h2 class="modal-titulo">Esperando confirmación...</h2>
+            <p class="modal-subtitulo">Contactando a <strong>{{ chofer.nombre }} {{ chofer.apellido }}</strong>. Por favor, no cierres esta pantalla.</p>
+            <div style="margin: 30px 0; font-size: 3em;">⏳</div>
+            <script>
+                // Recarga mientras espera que el chofer acepte
+                setTimeout(() => window.location.reload(), 4000);
+            </script>
+
+        {% elif viaje.estado_viaje.name == "CANCELADO" %}
+            <div class="alerta-error" style="margin-bottom: 25px; text-align: left;">
+                <h2 class="modal-titulo" style="color: #721c24; margin-bottom: 10px;">Viaje Cancelado</h2>
+                <p style="margin-top: 0; margin-bottom: 10px;">El viaje ha sido cancelado.</p>
+                <p style="font-size: 0.9em; font-weight: bold; margin-bottom: 0;">Nota: Las cancelaciones de viajes en curso generan un cargo del 10% sobre tu saldo por políticas de la empresa.</p>
+            </div>
+            
+            <div class="grupo-botones">
+                <a href="/pasajero/solicitar-viaje?id_pasajero={{ id_pasajero }}" class="link-boton">
+                    <button class="btn-ancho btn-verde">¿Desea buscar otro chofer?</button>
+                </a>
+                <a href="/panel-pasajero?id_pasajero={{ id_pasajero }}" class="btn-ancho btn-rojo link-boton">
+                    Volver al Panel
+                </a>
+            </div>
+
+        {% elif viaje.estado_viaje.name == "PAGO" %}
+            <h2 class="modal-titulo monto-positivo">¡Viaje Aceptado!</h2>
+            <p class="modal-subtitulo">El chofer va en camino.</p>
+
+            <div class="dato-item" style="text-align: left; margin-bottom: 25px;">
+                <h3 class="dato-label" style="font-size: 1.1rem; border-bottom: 1px solid #cbd5e1; padding-bottom: 8px; margin-bottom: 10px; color: #052659;">Datos del Chofer</h3>
+                <p class="texto-descripcion" style="margin-bottom: 5px;"><strong>Nombre:</strong> {{ chofer.nombre }} {{ chofer.apellido }}</p>
+                <p class="texto-descripcion" style="margin-bottom: 5px;"><strong>Vehículo:</strong> {{ vehiculo.marca }} {{ vehiculo.modelo }} ({{ vehiculo.color }})</p>
+                <p class="texto-descripcion" style="margin-bottom: 15px;"><strong>Placa:</strong> {{ vehiculo.matricula }}</p>
+                
+                <div style="border-top: 1px dashed #cbd5e1; margin: 15px 0;"></div>
+                
+                <p class="texto-descripcion" style="margin-bottom: 5px;"><strong>Ruta a recorrer:</strong> {{ viaje.distancia }} km</p>
+                <p class="texto-descripcion" style="margin-bottom: 15px;"><strong>Tiempo estimado:</strong> {{ viaje.duracion }} min</p>
+                
+                <div class="dato-item" style="background-color: #e2e8f0; text-align: center;">
+                    <p class="dato-label">Precio Total Acordado</p>
+                    <h2 class="modal-titulo" style="margin-bottom: 0;">${{ viaje.costo_viaje }}</h2>
+                </div>
+            </div>
+
+            <form action="/pasajero/cancelar-viaje" method="POST">
+                <input type="hidden" name="id_pasajero" value="{{ id_pasajero }}">
+                <input type="hidden" name="id_viaje" value="{{ viaje.id_viaje }}">
+                <button type="submit" class="btn-ancho btn-rojo">
+                    Cancelar Viaje
+                </button>
+            </form>
+
+            <script>
+                // Recarga para detectar cuando el chofer finalice el viaje
+                setTimeout(() => window.location.reload(), 5000);
+            </script>
+
+        {% elif viaje.estado_viaje.name == "FINALIZADO" %}
+            <div class="dato-item" style="background-color: #dcfce7; border-color: #bbf7d0; margin-bottom: 20px;">
+                <h2 class="modal-titulo monto-positivo" style="margin-bottom: 10px;">¡Llegaste a tu destino!</h2>
+                <p class="texto-descripcion" style="color: #166534; margin-bottom: 0;">El viaje ha finalizado exitosamente. Se ha descontado el monto de <strong>${{ viaje.costo_viaje }}</strong> de tu billetera virtual.</p>
+            </div>
+
+            <div class="dato-item" style="margin-bottom: 25px;">
+                <h3 class="modal-titulo" style="font-size: 1.3rem;">Califica a tu Chofer</h3>
+                <p class="texto-descripcion">Ayúdanos a mantener la calidad evaluando el servicio de {{ chofer.nombre }}.</p>
+                
+                <form action="/pasajero/calificar-viaje" method="POST">
+                    <input type="hidden" name="id_pasajero" value="{{ id_pasajero }}">
+                    <input type="hidden" name="id_viaje" value="{{ viaje.id_viaje }}">
+                    
+                    <!-- Select usando la clase input-estandar -->
+                    <select name="calificacion" required class="input-estandar" style="margin-bottom: 20px;">
+                        <option value="" disabled selected>Selecciona una puntuación</option>
+                        <option value="5">⭐⭐⭐⭐⭐ Excelente</option>
+                        <option value="4">⭐⭐⭐⭐ Muy Bueno</option>
+                        <option value="3">⭐⭐⭐ Bueno</option>
+                        <option value="2">⭐⭐ Regular</option>
+                        <option value="1">⭐ Malo</option>
+                    </select>
+                    
+                    <button type="submit" class="btn-ancho btn-verde">
+                        Calificar y Volver al Panel
+                    </button>
+                </form>
+            </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

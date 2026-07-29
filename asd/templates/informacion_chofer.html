@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}Mi Perfil - Decarrerita{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    
+    <!-- PANEL LATERAL -->
+    <aside class="panel-izquierdo">
+        <div class="perfil-header">
+            <div class="avatar-placeholder">
+                <img src="{{ url_for('static', path='images/usuario.png') }}" alt="Foto de perfil">
+            </div>
+            <div>
+                <h1>Mi Perfil</h1>
+            </div>
+        </div>
+        
+        <nav class="menu-lateral">
+            <!-- Botón de retorno al panel principal del chofer con sus parámetros -->
+            <a href="/panel-chofer?puntuacion={{ evaluacion.puntuacion if evaluacion else 0 }}&id_chofer={{ id_chofer }}" class="menu-item">← Volver al Panel</a>
+        </nav>
+    </aside>
+
+    <!-- ÁREA PRINCIPAL -->
+    <main class="panel-derecho" style="overflow-y: auto;">
+        
+        <header class="header-principal">
+            <h2>Mis Datos Personales</h2>
+            <p>Consulta la información básica de tu cuenta y tu desempeño en la plataforma.</p>
+        </header>
+
+        <div style="max-width: 900px;">
+            
+            <!-- TARJETA: INFORMACIÓN PERSONAL -->
+            <div class="tarjeta-formulario" style="margin-bottom: 30px;">
+                <h3 class="titulo-seccion-admin" style="margin-top: 0;">👤 Información Personal</h3>
+                
+                <div class="grid-datos">
+                    <div class="dato-item sin-fondo">
+                        <p class="dato-label">Nombre Completo</p>
+                        <p class="dato-valor texto-negrita">{{ usuario.nombre }} {{ usuario.apellido }}</p>
+                    </div>
+                    
+                    <div class="dato-item sin-fondo">
+                        <p class="dato-label">Cédula de Identidad</p>
+                        <p class="dato-valor texto-negrita">{{ usuario.cedula }}</p>
+                    </div>
+                    
+                    <div class="dato-item sin-fondo">
+                        <p class="dato-label">Correo Electrónico</p>
+                        <p class="dato-valor texto-negrita">{{ usuario.correo }}</p>
+                    </div>
+                    
+                    <div class="dato-item sin-fondo">
+                        <p class="dato-label">Dirección de Residencia</p>
+                        <p class="dato-valor texto-negrita">{{ usuario.direccion }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TARJETA: DESEMPEÑO GENERAL -->
+            <div class="tarjeta-formulario">
+                <h3 class="titulo-seccion-admin" style="margin-top: 0;">⭐ Desempeño General</h3>
+                
+                <div class="grid-datos">
+                    <!-- Calificación -->
+                    <div class="dato-item">
+                        <p class="dato-label">Calificación de Pasajeros</p>
+                        <p class="dato-valor texto-naranja texto-negrita">{{ chofer.calificacion }} / 5.0</p>
+                    </div>
+
+                    <!-- Evaluación Psicológica -->
+                    <div class="dato-item">
+                        <p class="dato-label">Evaluación Psicológica</p>
+                        {% if evaluacion and evaluacion.puntuacion > 0 %}
+                            <p class="dato-valor texto-verde texto-negrita">{{ evaluacion.puntuacion }} / 100 pts</p>
+                        {% else %}
+                            <p class="dato-valor texto-naranja texto-negrita" style="font-size: 1rem;">En Revisión</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Saldo -->
+                    <div class="dato-item">
+                        <p class="dato-label">Saldo Pendiente</p>
+                        <p class="dato-valor texto-rojo texto-negrita">${{ chofer.saldo_pendiente }}</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+</div>
+{% endblock %}

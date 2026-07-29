@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}Historial de Viajes - Decarrerita{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    
+    <!-- PANEL LATERAL -->
+    <aside class="panel-izquierdo">
+        <div class="perfil-header">
+            <div class="avatar-placeholder">
+                <img src="{{ url_for('static', path='images/usuario.png') }}" alt="Foto de perfil">
+            </div>
+            <h1>Mis Viajes</h1>
+        </div>
+        
+        <nav class="menu-lateral">
+            <a href="/panel-pasajero?id_pasajero={{ id_pasajero }}" class="menu-item">⬅ Volver al Panel</a>
+        </nav>
+    </aside>
+
+    <!-- ÁREA PRINCIPAL -->
+    <main class="panel-derecho">
+        
+        <header class="header-principal">
+            <h2>Historial de Viajes</h2>
+            <p>Aquí puedes ver el detalle y estado de todos los traslados que has solicitado cronológicamente.</p>
+        </header>
+
+        <div class="tarjeta-formulario" style="max-width: 100%;">
+            
+            {% if viajes|length == 0 %}
+                <div class="alerta-warning">
+                    Aún no has realizado ningún viaje con nosotros.
+                </div>
+            {% else %}
+                <div class="contenedor-tabla">
+                    <table class="tabla-estilizada">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Chofer Asignado</th>
+                                <th>Recorrido</th>
+                                <th>Estado</th>
+                                <th>Mi Calificación</th>
+                                <th class="text-right">Costo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for viaje, chofer in viajes %}
+                            <tr class="fila-interactiva">
+                                <td>{{ viaje.fecha_viaje }}</td>
+                                <td>{{ chofer.nombre }} {{ chofer.apellido }}</td>
+                                <td>{{ viaje.distancia }} km (Aprox. {{ viaje.duracion }} min)</td>
+                                <td>
+                                    <!-- Colores dinámicos dependiendo del estado del viaje -->
+                                    {% if viaje.estado_viaje.name == 'FINALIZADO' %}
+                                        <span style="color: #16a34a; font-weight: bold;">Finalizado</span>
+                                    {% elif viaje.estado_viaje.name == 'CANCELADO' %}
+                                        <span style="color: #dc3545; font-weight: bold;">Cancelado</span>
+                                    {% elif viaje.estado_viaje.name == 'PAGO' %}
+                                        <span style="color: #007bff; font-weight: bold;">En Curso</span>
+                                    {% else %}
+                                        <span style="color: #f59e0b; font-weight: bold;">En Espera</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if viaje.puntuacion_chofer %}
+                                        ⭐ {{ viaje.puntuacion_chofer }}
+                                    {% else %}
+                                        <span style="color: #999; font-size: 0.9em;">N/A</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-right" style="font-weight: bold; color: #052659;">
+                                    ${{ viaje.costo_viaje }}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+            
+        </div>
+    </main>
+</div>
+{% endblock %}

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Revisiones Vehiculares - Decarrerita{% endblock %}
+{% block title %}Evaluaciones Pendientes - Decarrerita{% endblock %}
 
 {% block content %}
 <div class="dashboard-container">
@@ -12,11 +12,12 @@
                 <img src="{{ url_for('static', path='images/usuario.png') }}" alt="Admin">
             </div>
             <div>
-                <h1>Revisiones</h1>
+                <h1>Evaluaciones</h1>
             </div>
         </div>
         
         <nav class="menu-lateral">
+            <!-- Nota: Puedes cambiar 'superadmin' por '{{ rol }}' si necesitas que sea dinámico -->
             <a href="/panel-administracion?rol=superadmin" class="menu-item">← Volver al Panel</a>
         </nav>
     </aside>
@@ -25,8 +26,8 @@
     <main class="panel-derecho" style="overflow-y: auto;">
         
         <header class="header-principal">
-            <h2>Revisiones Vehiculares por Aprobar</h2>
-            <p>Haz clic en cualquier vehículo de la lista para registrar la calificación de su revisión técnica.</p>
+            <h2>Pruebas Psicológicas por Aprobar</h2>
+            <p>Haz clic en cualquier aspirante de la lista para registrar su calificación en el sistema.</p>
         </header>
 
         <div class="tarjeta-formulario" style="max-width: 100%;">
@@ -35,25 +36,25 @@
                 <table class="tabla-estilizada">
                     <thead>
                         <tr>
-                            <th>ID Revisión</th>
-                            <th>Matrícula</th>
-                            <th>Marca y Modelo</th>
+                            <th>ID Evaluación</th>
+                            <th>Nombre Completo</th>
+                            <th>Cédula</th>
                             <th>Fecha de Solicitud</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for vehiculo, revision in revisiones %}
-                        <!-- Usamos fila-clic para que sea interactivo -->
-                        <tr class="fila-clic" onclick="abrirModalCalificacion('{{ revision.id_revision }}', '{{ vehiculo.marca }} {{ vehiculo.modelo }} ({{ vehiculo.matricula }})')">
-                            <td class="texto-negrita">{{ revision.id_revision }}</td>
-                            <td class="texto-naranja">{{ vehiculo.matricula }}</td>
-                            <td>{{ vehiculo.marca }} {{ vehiculo.modelo }}</td>
-                            <td class="texto-gris">{{ revision.fecha_revision }}</td>
+                        {% for usuario, evaluacion in evaluaciones %}
+                        <!-- Le agregamos 'fila-clic' para que el cursor cambie a la manito -->
+                        <tr class="fila-clic" onclick="abrirModalCalificacion('{{ evaluacion.id_evaluacion }}', '{{ usuario.nombre }} {{ usuario.apellido }}')">
+                            <td class="texto-negrita">{{ evaluacion.id_evaluacion }}</td>
+                            <td>{{ usuario.nombre }} {{ usuario.apellido }}</td>
+                            <td>{{ usuario.cedula }}</td>
+                            <td class="texto-gris">{{ evaluacion.fecha_evaluacion }}</td>
                         </tr>
                         {% else %}
                         <tr>
                             <td colspan="4" style="padding: 25px; text-align: center; color: #64748b;">
-                                No hay vehículos pendientes por revisión. 
+                                No hay pruebas psicológicas pendientes por aprobar. ✅
                             </td>
                         </tr>
                         {% endfor %}
@@ -65,21 +66,21 @@
     </main>
 </div>
 
-<!-- VENTANA MODAL FLOTANTE (Reutilizando los estilos de Evaluaciones) -->
+<!-- VENTANA MODAL FLOTANTE (Oculta por defecto) -->
 <div id="modalCalificacion" class="modal-overlay">
     <div class="modal-contenido">
-        <h3 class="modal-titulo">Calificar Vehículo</h3>
-        <p class="modal-subtitulo" id="nombreVehiculoModal"></p>
+        <h3 class="modal-titulo">Calificar Chofer</h3>
+        <p class="modal-subtitulo" id="nombreChoferModal"></p>
         
-        <form action="/administracion/revision/guardar" method="POST">
-            <input type="hidden" name="id_revision" id="idRevisionModal" value="">
+        <form action="/administracion/evaluacion/guardar" method="POST">
+            <input type="hidden" name="id_evaluacion" id="idEvaluacionModal" value="">
             
             <div class="grupo-input" style="margin-bottom: 25px;">
                 <label style="display: block; font-size: 0.95rem; color: #475569; margin-bottom: 8px; font-weight: bold;">
-                    Puntuación de la revisión (1-100):
+                    Puntuación de la prueba (1-100):
                 </label>
-                <!-- Conservamos el step="any" para los decimales -->
-                <input type="number" step="any" name="puntuacion" min="1" max="100" placeholder="Ej. 85" required 
+                <!-- Reutilizamos los estilos de input que ya tienes -->
+                <input type="number" name="puntuacion" min="1" max="100" placeholder="Ej. 85" required 
                        style="width: 100%; padding: 14px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 1rem; box-sizing: border-box;">
             </div>
             
@@ -95,17 +96,20 @@
 
 <!-- SCRIPT PARA EL MODAL -->
 <script>
-    function abrirModalCalificacion(idRev, infoVehiculo) {
-        document.getElementById('idRevisionModal').value = idRev;
-        // Le agregamos el texto "Vehículo:" para darle más contexto
-        document.getElementById('nombreVehiculoModal').innerText = "Vehículo: " + infoVehiculo;
+    function abrirModalCalificacion(idEval, nombreChofer) {
+        // Asigna el ID oculto
+        document.getElementById('idEvaluacionModal').value = idEval;
+        // Muestra el nombre en pantalla para que el admin sepa a quién califica
+        document.getElementById('nombreChoferModal').innerText = "Aspirante: " + nombreChofer;
+        // Muestra el modal
         document.getElementById('modalCalificacion').style.display = 'flex';
     }
 
     function cerrarModal() {
+        // Oculta el modal y limpia los datos
         document.getElementById('modalCalificacion').style.display = 'none';
-        document.getElementById('idRevisionModal').value = '';
-        document.getElementById('nombreVehiculoModal').innerText = '';
+        document.getElementById('idEvaluacionModal').value = '';
+        document.getElementById('nombreChoferModal').innerText = '';
     }
 </script>
 {% endblock %}

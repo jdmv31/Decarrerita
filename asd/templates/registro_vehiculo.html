@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}Registrar Vehículo - Decarrerita{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    
+    <!-- PANEL LATERAL -->
+    <aside class="panel-izquierdo">
+        <div class="perfil-header">
+            <div class="avatar-placeholder">
+                <img src="{{ url_for('static', path='images/usuario.png') }}" alt="Foto de perfil">
+            </div>
+            <div>
+                <h1>Mi Vehículo</h1>
+            </div>
+        </div>
+        
+        <nav class="menu-lateral">
+            <a href="/panel-chofer?id_chofer={{ id_chofer }}" class="menu-item">← Volver al Panel</a>
+        </nav>
+    </aside>
+
+    <!-- ÁREA PRINCIPAL -->
+    <main class="panel-derecho" style="overflow-y: auto;">
+        
+        <header class="header-principal">
+            <h2>Registrar Vehículo</h2>
+            <p class="texto-descripcion">Ingresa los datos de la unidad que utilizarás para realizar los traslados en la plataforma.</p>
+        </header>
+
+        <div class="tarjeta-formulario ancho-max-600">
+            {% if error %}
+                <div class="alerta-error" style="margin-bottom: 20px; text-align: center;">
+                    <strong>Atención!</strong> {{ error }}
+                </div>
+            {% endif %}
+
+            <form action="/chofer/vehiculo" method="POST">
+                <input type="hidden" name="id_chofer" value="{{ id_chofer }}">
+                
+                <!-- PLACA -->
+                <!-- Se envolvió en un grid-2-col para aprovechar su margin-bottom de 20px automático sin usar estilos en línea -->
+                <div class="grid-2-col">
+                    <div class="grupo-input">
+                        <label class="label-estandar">Placa / Matrícula:</label>
+                        <input type="text" name="placa" placeholder="Ej. AA11BB" required class="input-estandar">
+                    </div>
+                </div>
+
+                <!-- MARCA Y MODELO (2 Columnas) -->
+                <div class="grid-2-col">
+                    <div class="grupo-input">
+                        <label class="label-estandar">Marca:</label>
+                        <input type="text" name="marca" placeholder="Ej. Chevrolet" required class="input-estandar">
+                    </div>
+                    <div class="grupo-input">
+                        <label class="label-estandar">Modelo:</label>
+                        <input type="text" name="modelo" placeholder="Ej. Aveo" required class="input-estandar">
+                    </div>
+                </div>
+
+                <!-- COLOR Y AÑO (2 Columnas) -->
+                <div class="grid-2-col">
+                    <div class="grupo-input">
+                        <label class="label-estandar">Color:</label>
+                        <input type="text" name="color" placeholder="Ej. Plata" required class="input-estandar">
+                    </div>
+                    <div class="grupo-input">
+                        <label class="label-estandar">Año:</label>
+                        <!-- type="number" abre el teclado numérico en celulares -->
+                        <input type="number" name="anio" placeholder="Ej. 2015" required class="input-estandar">
+                    </div>
+                </div>
+
+                <!-- BOTONES -->
+                <div class="grupo-botones">
+                    <!-- Se cambió btn-primario (inexistente en el CSS) por btn-verde para mantener coherencia de guardado -->
+                    <button type="submit" class="btn-ancho btn-verde">
+                        Guardar Vehículo
+                    </button>
+                    
+                    <a href="/panel-chofer?id_chofer={{ id_chofer }}" class="btn-ancho btn-rojo link-boton">
+                        Cancelar y Volver
+                    </a>
+                </div>
+            </form>
+            
+        </div>
+    </main>
+</div>
+{% endblock %}
