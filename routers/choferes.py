@@ -54,6 +54,9 @@ def ver_datos_personales(request: Request, id_chofer: int, db: Session = Depends
     chofer_db = db.query(models.Choferes).filter(models.Choferes.id_chofer == id_chofer).first()
     evaluacion_db = db.query(models.EvaluacionChofer).filter(models.EvaluacionChofer.id_chofer == id_chofer).first()
     
+    # NUEVO: Obtenemos los vehículos del chofer para mostrarlos en sus datos personales
+    vehiculos = db.query(models.Vehiculos).filter(models.Vehiculos.id_chofer == id_chofer).all()
+    
     return templates.TemplateResponse(
         request=request,
         name="informacion_chofer.html",
@@ -61,7 +64,8 @@ def ver_datos_personales(request: Request, id_chofer: int, db: Session = Depends
             "id_chofer": id_chofer,
             "usuario": usuario_db,
             "chofer": chofer_db,
-            "evaluacion": evaluacion_db
+            "evaluacion": evaluacion_db,
+            "vehiculos": vehiculos # Añadido al contexto
         }
     )
 
@@ -75,13 +79,26 @@ def panel_banco(request: Request, id_chofer: int):
 
 @router.get("/chofer/contactos-emergencia")
 def panel_contactos(request: Request, id_chofer: int, db: Session = Depends(get_db)):
-    contactos = db.query(models.AgendaContactos).filter(models.AgendaContactos.id_chofer == id_chofer).count()
+    # Conteo para validar el límite
+    cantidad_contactos = db.query(models.AgendaContactos).filter(models.AgendaContactos.id_chofer == id_chofer).count()
+    
+    # NUEVO: Lista con nombres y teléfonos unidos para la tabla
+    contactos_lista = db.query(
+        models.AgendaContactos.nombre_contacto.label("nombre"),
+        models.ContactosEmergencia.numero_telefonico.label("telefono")
+    ).join(
+        models.ContactosEmergencia, models.AgendaContactos.id_contacto == models.ContactosEmergencia.id_contacto
+    ).filter(
+        models.AgendaContactos.id_chofer == id_chofer
+    ).all()
+
     return templates.TemplateResponse(
         request = request,
         name = "contactos.html",
         context = {
             "id_chofer": id_chofer, 
-            "contactos": contactos
+            "cantidad_contactos": cantidad_contactos,
+            "contactos": contactos_lista # Añadido al contexto
         }
     )
 

@@ -72,6 +72,37 @@
                     <span class="texto-negrita">Nota: {{ puntuacion }}/100</span>
                 </div>
 
+
+                {% if contactos %}
+                <div style="margin-bottom: 30px;">
+                    <h4 style="margin-bottom: 10px; color: #334155;">📞 Contactos de Emergencia</h4>
+                    
+                    {% if cantidad_contactos >= 2 %}
+                    <div style="background-color: #f0f9ff; border: 1px solid #bae6fd; color: #0369a1; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                        <div style="font-weight: bold; margin-bottom: 5px; color: #0284c7;">✅ Límite Alcanzado</div>
+                        <div style="font-size: 0.9em;">Ya tienes registrados tus 2 contactos de emergencia permitidos por el sistema. Estás listo para continuar.</div>
+                    </div>
+                    {% endif %}
+
+                    <table style="width: 100%; border-collapse: collapse; background-color: white; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden;">
+                        <thead style="background-color: #f8fafc; text-align: left;">
+                            <tr>
+                                <th style="padding: 10px; border-bottom: 1px solid #e2e8f0;">Nombre</th>
+                                <th style="padding: 10px; border-bottom: 1px solid #e2e8f0;">Teléfono</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for c in contactos %}
+                            <tr>
+                                <td style="padding: 10px; border-bottom: 1px solid #e2e8f0;">{{ c.nombre }}</td>
+                                <td style="padding: 10px; border-bottom: 1px solid #e2e8f0;">{{ c.telefono }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+
                 <!-- COMPLETAR REGISTRO -->
                 <h3 class="titulo-seccion-admin">📋 Completar Registro</h3>
                 <div class="grid-modulos">

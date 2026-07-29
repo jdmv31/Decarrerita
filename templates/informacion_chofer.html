@@ -60,7 +60,7 @@
             </div>
 
             <!-- TARJETA: DESEMPEÑO GENERAL -->
-            <div class="tarjeta-formulario">
+            <div class="tarjeta-formulario" style="margin-bottom: 30px;">
                 <h3 class="titulo-seccion-admin" style="margin-top: 0;">⭐ Desempeño General</h3>
                 
                 <div class="grid-datos">
@@ -87,6 +87,31 @@
                     </div>
                 </div>
             </div>
+
+            <!-- NUEVO: TABLA DE VEHÍCULOS -->
+            {% if vehiculos %}
+            <div class="tarjeta-formulario">
+                <h3 class="titulo-seccion-admin" style="margin-top: 0;">🚗 Vehículos Registrados</h3>
+                <table style="width: 100%; border-collapse: collapse; background-color: white; border-radius: 8px; overflow: hidden; margin-top: 15px;">
+                    <thead style="background-color: #f8fafc; text-align: left;">
+                        <tr>
+                            <th style="padding: 12px; border-bottom: 1px solid #e2e8f0; color: #0f172a;">Marca</th>
+                            <th style="padding: 12px; border-bottom: 1px solid #e2e8f0; color: #0f172a;">Modelo</th>
+                            <th style="padding: 12px; border-bottom: 1px solid #e2e8f0; color: #0f172a;">Matrícula</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for v in vehiculos %}
+                        <tr>
+                            <td style="padding: 12px; border-bottom: 1px solid #e2e8f0; color: #334155;">{{ v.marca }}</td>
+                            <td style="padding: 12px; border-bottom: 1px solid #e2e8f0; color: #334155;">{{ v.modelo }}</td>
+                            <td style="padding: 12px; border-bottom: 1px solid #e2e8f0; color: #334155;">{{ v.matricula }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
 
         </div>
     </main>

@@ -31,13 +31,36 @@
 
         <div class="tarjeta-formulario" style="max-width: 600px;">
             
-            {% if contactos == 2 %}
-                <!-- Límite alcanzado -->
-                <div class="alerta-warning" style="background-color: #e0f2fe; border: 1px solid #bae6fd; color: #0369a1;">
-                    <h3 style="margin-top: 0; margin-bottom: 8px;">✅ Límite Alcanzado</h3>
-                    <p style="margin: 0;">Ya tienes registrados tus 2 contactos de emergencia permitidos por el sistema. Estás listo para continuar.</p>
+            <!-- PRIMERO MOSTRAMOS LA TABLA (Si hay algún contacto registrado) -->
+            {% if contactos %}
+            <div style="margin-bottom: 25px;">
+                <table style="width: 100%; border-collapse: collapse; background-color: white; border-radius: 8px; overflow: hidden; border: 1px solid #e2e8f0;">
+                    <thead style="background-color: #f8fafc; text-align: left;">
+                        <tr>
+                            <th style="padding: 12px; border-bottom: 1px solid #e2e8f0; color: #0f172a;">Nombre</th>
+                            <th style="padding: 12px; border-bottom: 1px solid #e2e8f0; color: #0f172a;">Teléfono</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for c in contactos %}
+                        <tr>
+                            <td style="padding: 12px; border-bottom: 1px solid #e2e8f0; color: #334155;">{{ c.nombre }}</td>
+                            <td style="padding: 12px; border-bottom: 1px solid #e2e8f0; color: #334155;">{{ c.telefono }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
+
+            <!-- LUEGO MOSTRAMOS EL MENSAJE CHIQUITO O EL FORMULARIO -->
+            {% if cantidad_contactos >= 2 %}
+                <!-- Mensaje de Límite alcanzado más pequeño y discreto -->
+                <div class="alerta-warning" style="background-color: #e0f2fe; border: 1px solid #bae6fd; color: #0369a1; padding: 10px; border-radius: 6px; font-size: 0.9rem; text-align: center;">
+                    <strong>✅ Límite Alcanzado:</strong> Ya tienes registrados tus 2 contactos permitidos por el sistema.
                 </div>
             {% else %}
+                <!-- Formulario para agregar más contactos -->
                 {% if error %}
                     <div class="alerta-error" style="margin-bottom: 20px; text-align: center;">
                         <strong>¡Atención!</strong> {{ error }}
@@ -45,7 +68,7 @@
                 {% endif %}
                 
                 <h3 class="titulo-seccion-admin" style="margin-top: 0;">Agregar Nuevo Contacto</h3>
-                <p style="color: #64748b; margin-bottom: 25px;">Te quedan <strong>{{ 2 - contactos }}</strong> espacios disponibles.</p>
+                <p style="color: #64748b; margin-bottom: 25px;">Te quedan <strong>{{ 2 - cantidad_contactos }}</strong> espacios disponibles.</p>
                 
                 <form action="/chofer/registrar-contacto" method="POST">
                     <input type="hidden" name="id_chofer" value="{{ id_chofer }}">
@@ -62,14 +85,13 @@
                             Número Telefónico:
                         </label>
                         
-                        <!-- Contenedor flexible que creamos en el CSS -->
                         <div class="input-agrupado">
                             <select name="numeral" required>
                                 <option value="" disabled selected>Cód.</option>
                                 <option value="0412">0412</option>
                                 <option value="0414">0414</option>
                                 <option value="0416">0416</option>
-                                <option value="0422">0422</option> <!-- ¡Corregido! -->
+                                <option value="0422">0422</option>
                                 <option value="0424">0424</option>
                                 <option value="0426">0426</option>
                             </select>
