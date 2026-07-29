@@ -136,14 +136,27 @@ def choferes_registrados(request: Request, rol: str, db: Session = Depends(get_d
         models.Choferes, models.Usuarios.id_usuario == models.Choferes.id_chofer
     ).all()
     
-    if not choferes_db:
-        choferes_db = 0
+    lista_choferes = []
+
+    for usuario, chofer in choferes_db:
+        vehiculos = db.query(models.Vehiculos).filter(models.Vehiculos.id_chofer == usuario.id_usuario).all()
+
+        telefonos = db.query(models.ContactosEmergencia).join(
+            models.AgendaContactos, models.ContactosEmergencia.id_contacto == models.AgendaContactos.id_contacto
+        ).filter(models.AgendaContactos.id_chofer == usuario.id_usuario).all()
+        
+        lista_choferes.append({
+            "usuario": usuario,
+            "chofer": chofer,
+            "vehiculos": vehiculos,
+            "telefonos": telefonos
+        })
         
     return templates.TemplateResponse(
         request = request,
         name = "choferes.html",
         context = {
-            "choferes": choferes_db, 
+            "choferes": lista_choferes if lista_choferes else 0, 
             "rol": rol
         }
     )

@@ -48,17 +48,46 @@
                                 <th>Nombre Completo</th>
                                 <th>C.I</th>
                                 <th>Correo</th>
+                                <th>Teléfono(s)</th>
+                                <th>Vehículo(s)</th>
                                 <th>Calificación</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for usuario, chofer in choferes %}
+                            <!-- Iteramos sobre la lista de diccionarios 'data' generada en FastAPI -->
+                            {% for data in choferes %}
                             <tr>
-                                <td class="texto-negrita">{{ chofer.id_chofer }}</td>
-                                <td>{{ usuario.nombre }} {{ usuario.apellido }}</td>
-                                <td>{{ usuario.cedula }}</td>
-                                <td class="texto-gris">{{ usuario.correo }}</td>
-                                <td class="texto-naranja">{{ chofer.calificacion }} ⭐</td>
+                                <td class="texto-negrita">{{ data.chofer.id_chofer }}</td>
+                                <td>{{ data.usuario.nombre }} {{ data.usuario.apellido }}</td>
+                                <td>{{ data.usuario.cedula }}</td>
+                                <td class="texto-gris">{{ data.usuario.correo }}</td>
+                                
+                                <!-- Columna de Teléfonos -->
+                                <td>
+                                    {% if data.telefonos %}
+                                        {% for tlf in data.telefonos %}
+                                            <div style="margin-bottom: 4px;">{{ tlf.numero_telefonico }}</div>
+                                        {% endfor %}
+                                    {% else %}
+                                        <span class="texto-gris" style="font-style: italic;">Sin teléfono</span>
+                                    {% endif %}
+                                </td>
+                                
+                                <!-- Columna de Vehículos -->
+                                <td>
+                                    {% if data.vehiculos %}
+                                        {% for vehiculo in data.vehiculos %}
+                                            <div style="margin-bottom: 4px;">
+                                                {{ vehiculo.marca }} {{ vehiculo.modelo }} 
+                                                <span class="texto-gris" style="font-size: 0.9em;">({{ vehiculo.matricula }})</span>
+                                            </div>
+                                        {% endfor %}
+                                    {% else %}
+                                        <span class="texto-gris" style="font-style: italic;">Sin vehículo</span>
+                                    {% endif %}
+                                </td>
+                                
+                                <td class="texto-naranja">{{ data.chofer.calificacion }} ⭐</td>
                             </tr>
                             {% endfor %}
                         </tbody>

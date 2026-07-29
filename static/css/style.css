@@ -912,11 +912,3 @@ button:hover {
     text-decoration: none;
     box-sizing: border-box;
 }
-
-/* --- UTILIDAD PARA SCROLL EN PANELES --- */
-.panel-con-scroll {
-    overflow-y: auto;
-    height: 100vh; /* Se asegura de usar la altura de la ventana */
-    padding-bottom: 60px; /* El colchón de espacio al final */
-    box-sizing: border-box;
-}
