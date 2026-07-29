@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Gestión de Personal - Decarrerita{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    
+    <aside class="panel-izquierdo">
+        <div class="perfil-header">
+            <div class="avatar-placeholder">
+                <img src="{{ url_for('static', path='images/usuario.png') }}" alt="Admin">
+            </div>
+            <h1>Gestión</h1>
+        </div>
+        <nav class="menu-lateral">
+            <a href="/panel-administracion?rol={{ rol }}&id_admin={{ id_admin }}" class="menu-item">⬅ Volver al Panel</a>
+            <a href="/administracion/personal?rol={{ rol }}&id_admin={{ id_admin }}" class="menu-item" style="background-color: rgba(255, 255, 255, 0.1); color: #ffffff;"> Promover Personal</a>
+            <a href="/administracion/administradores?rol={{ rol }}&id_admin={{ id_admin }}" class="menu-item">➕ Agregar Personal</a>
+        </nav>
+    </aside>
+
+    <main class="panel-derecho">
+        <header class="header-principal">
+            <h2>Personal Administrativo</h2>
+            <p>Gestiona los permisos y roles de los miembros de la empresa.</p>
+        </header>
+
+        <div class="contenedor-tabla">
+            <table class="tabla-estilizada">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre Completo</th>
+                        <th>Cédula</th>
+                        <th>Correo</th>
+                        <th>Rol Actual</th>
+                        <th class="text-right">Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for empleado in personal %}
+                    <tr class="fila-interactiva">
+                        <td>{{ empleado.id_usuario }}</td>
+                        <td>{{ empleado.nombre }} {{ empleado.apellido }}</td>
+                        <td>{{ empleado.cedula }}</td>
+                        <td>{{ empleado.correo }}</td>
+                        <td>
+                            {% if empleado.rol == 'superadmin' %}
+                                <span style="color: #28a745; font-weight: bold;">Super Admin</span>
+                            {% else %}
+                                <span style="color: #007bff; font-weight: bold;">Administrador</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-right">
+                            {% if empleado.rol == 'admin' %}
+                            <form action="/administracion/personal/promover" method="POST" style="margin: 0;">
+                                <!-- Datos ocultos necesarios para el backend -->
+                                <input type="hidden" name="id_usuario" value="{{ empleado.id_usuario }}">
+                                <input type="hidden" name="id_admin" value="{{ id_admin }}">
+                                <input type="hidden" name="rol" value="{{ rol }}">
+                                
+                                <button type="submit" style="background-color: #f59e0b; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.9em; transition: background-color 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                    Ascender a Super Admin
+                                </button>
+                            </form>
+                            {% else %}
+                                <span style="color: #6c757d; font-size: 0.9em;">Nivel Máximo Alcanzado</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 20px; color: #777;">No hay personal registrado en el sistema.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </main>
+</div>
+{% endblock %}

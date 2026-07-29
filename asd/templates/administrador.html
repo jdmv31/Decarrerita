@@ -30,11 +30,6 @@
         </header>
 
         <div class="tarjeta-formulario">
-            {% if error %}
-                <div class="alerta-error" style="margin-bottom: 20px; text-align: center;">
-                    <strong>Atención!</strong> {{ error }}
-                </div>
-            {% endif %}
             <form action="/administracion/administradores/agregar" method="POST" class="formulario-estilizado">
                 <input type="hidden" name="rol_creador" value="{{ rol }}">
                 <input type="hidden" name="id_admin" value="{{ id_admin }}">

@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Pasajeros Registrados - Decarrerita{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    
+    <!-- PANEL LATERAL -->
+    <aside class="panel-izquierdo">
+        <div class="perfil-header">
+            <div class="avatar-placeholder">
+                <img src="{{ url_for('static', path='images/usuario.png') }}" alt="Admin">
+            </div>
+            <div>
+                <h1>Registro</h1>
+                <span style="color: rgba(255,255,255,0.7); font-size: 0.9em; text-transform: capitalize;">
+                    {{ rol }}
+                </span>
+            </div>
+        </div>
+        
+        <nav class="menu-lateral">
+            <a href="/panel-administracion?rol={{rol}}" class="menu-item">← Volver al Panel</a>
+        </nav>
+    </aside>
+
+    <!-- ÁREA PRINCIPAL -->
+    <main class="panel-derecho" style="overflow-y: auto;">
+        
+        <header class="header-principal">
+            <h2>Pasajeros Registrados</h2>
+            <p>Consulta la lista completa de pasajeros activos en la plataforma de Decarrerita.</p>
+        </header>
+
+        <div class="tarjeta-formulario" style="max-width: 100%;">
+            
+            {% if pasajeros == 0 %}
+                <div class="alerta-warning">
+                    No hay pasajeros registrados en el sistema actualmente.
+                </div>
+            {% else %}
+                <!-- CONTENEDOR DE LA TABLA ESTILIZADA -->
+                <div class="contenedor-tabla">
+                    <table class="tabla-estilizada">
+                        <thead>
+                            <tr>
+                                <th>ID Pasajero</th>
+                                <th>Nombre Completo</th>
+                                <th>C.I</th>
+                                <th>Correo</th>
+                                <th>Dirección</th>
+                                <th>Calificación</th>
+                                <th>Saldo en Cuenta</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for usuario, pasajero in pasajeros %}
+                            <tr>
+                                <td class="texto-negrita">{{ pasajero.id_pasajero }}</td>
+                                <td>{{ usuario.nombre }} {{ usuario.apellido }}</td>
+                                <td>{{ usuario.cedula }}</td>
+                                <td class="texto-gris">{{ usuario.correo }}</td>
+                                <td>{{ usuario.direccion }}</td>
+                                <td class="texto-naranja">{{ pasajero.calificacion }} ⭐</td>
+                                <!-- Usamos la clase monto-positivo para que el saldo resalte en verde -->
+                                <td class="monto-positivo">${{ pasajero.saldo_disponible }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+            
+        </div>
+        
+    </main>
+</div>
+{% endblock %}

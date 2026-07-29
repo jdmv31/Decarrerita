@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}Viaje en Curso - Decarrerita{% endblock %}
+
+{% block content %}
+<!-- modal-overlay cubre toda la pantalla. Forzamos display: flex para que sea visible de inmediato -->
+<div class="modal-overlay" style="display: flex;">
+    
+    <!-- modal-contenido crea la tarjeta blanca centrada, redondeada y con sombras -->
+    <div class="modal-contenido" style="max-width: 500px; text-align: center;">
+
+        {% if viaje.estado_viaje.name == "CANCELADO" %}
+            <div class="alerta-error" style="margin-bottom: 25px; text-align: left;">
+                <h2 class="modal-titulo" style="color: #721c24; margin-bottom: 10px;">Viaje Cancelado</h2>
+                <p style="margin-top: 0; margin-bottom: 0;">El pasajero ha reportado un percance y ha cancelado el viaje. Ya te encuentras disponible nuevamente en el sistema.</p>
+            </div>
+            
+            <a href="/panel-chofer?id_chofer={{ id_chofer }}" class="btn-ancho btn-rojo link-boton">
+                Volver al Panel
+            </a>
+
+        {% elif viaje.estado_viaje.name == "PAGO" %}
+            <h2 class="modal-titulo">Viaje en Curso</h2>
+            <p class="modal-subtitulo">Dirígete al punto de encuentro.</p>
+
+            <div class="dato-item" style="text-align: left; margin-bottom: 20px;">
+                <h3 class="dato-label" style="font-size: 1.1rem; border-bottom: 1px solid #cbd5e1; padding-bottom: 8px; margin-bottom: 10px; color: #052659;">Datos del Pasajero</h3>
+                <p class="texto-descripcion" style="margin-bottom: 5px;"><strong>Nombre:</strong> {{ pasajero.nombre }} {{ pasajero.apellido }}</p>
+                <p class="texto-descripcion" style="margin-bottom: 15px;"><strong>Calificación:</strong> ⭐ {{ perfil_pasajero.calificacion }} / 5.0</p>
+                
+                <div style="border-top: 1px dashed #cbd5e1; margin: 15px 0;"></div>
+                
+                <p class="texto-descripcion" style="margin-bottom: 5px;"><strong>Distancia:</strong> {{ viaje.distancia }} km</p>
+                <p class="texto-descripcion" style="margin-bottom: 5px;"><strong>Tiempo estimado:</strong> {{ viaje.duracion }} min</p>
+                <p class="texto-descripcion" style="margin-bottom: 0;"><strong>Monto total cobrado al cliente:</strong> ${{ viaje.costo_viaje }}</p>
+            </div>
+
+            <div class="dato-item" style="background-color: #dcfce7; border-color: #bbf7d0; margin-bottom: 20px;">
+                <p class="dato-label" style="color: #166534;">Tu ganancia por este traslado (70%)</p>
+                <h1 class="modal-titulo monto-positivo" style="margin-bottom: 0;">${{ ganancia }}</h1>
+            </div>
+
+            <!-- Botón que abre el modal secundario Y DETIENE LA RECARGA -->
+            <button type="button" onclick="abrirModalChofer()" class="btn-ancho btn-verde">
+                Viaje Finalizado
+            </button>
+
+            <!-- Modal de Calificación (Superpuesto sobre la tarjeta principal) -->
+            <div id="modalFinalizar" class="modal-overlay" style="display: none; z-index: 3000;">
+                <div class="modal-contenido" style="max-width: 350px; text-align: center;">
+                    <h3 class="modal-titulo">Califica al Pasajero</h3>
+                    <p class="modal-subtitulo">¿Qué tal fue tu experiencia de traslado con {{ pasajero.nombre }}?</p>
+                    
+                    <form action="/chofer/finalizar-viaje" method="POST">
+                        <input type="hidden" name="id_chofer" value="{{ id_chofer }}">
+                        <input type="hidden" name="id_viaje" value="{{ viaje.id_viaje }}">
+                        
+                        <select name="calificacion" required class="input-estandar" style="margin-bottom: 20px;">
+                            <option value="" disabled selected>Selecciona una puntuación</option>
+                            <option value="5">⭐⭐⭐⭐⭐ Excelente</option>
+                            <option value="4">⭐⭐⭐⭐ Muy Bueno</option>
+                            <option value="3">⭐⭐⭐ Bueno</option>
+                            <option value="2">⭐⭐ Regular</option>
+                            <option value="1">⭐ Malo</option>
+                        </select>
+                        
+                        <!-- Al dar clic aquí, la petición POST se enviará sin interrupciones -->
+                        <button type="submit" class="btn-ancho btn-verde" style="margin-bottom: 10px;">
+                            Confirmar y Finalizar
+                        </button>
+                        
+                        <!-- Botón de cancelar reactiva la recarga -->
+                        <button type="button" onclick="cerrarModalChofer()" class="btn-ancho btn-rojo">
+                            Cancelar
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <script>
+                // Creamos una variable para guardar el temporizador
+                let temporizadorRecarga;
+
+                function iniciarRecarga() {
+                    temporizadorRecarga = setTimeout(() => window.location.reload(), 5000);
+                }
+
+                function abrirModalChofer() {
+                    // Muestra el modal secundario usando flex
+                    document.getElementById('modalFinalizar').style.display = 'flex';
+                    // ¡Magia! Pausamos la bomba de tiempo para que el chofer evalúe con calma
+                    clearTimeout(temporizadorRecarga); 
+                }
+
+                function cerrarModalChofer() {
+                    // Oculta el modal secundario
+                    document.getElementById('modalFinalizar').style.display = 'none';
+                    // Si se arrepiente y cierra el recuadro, volvemos a iniciar el radar
+                    iniciarRecarga(); 
+                }
+
+                // Arrancamos el radar de 5 segundos por primera vez al cargar la página
+                iniciarRecarga();
+            </script>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

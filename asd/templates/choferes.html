@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Choferes Registrados - Decarrerita{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    
+    <!-- PANEL LATERAL -->
+    <aside class="panel-izquierdo">
+        <div class="perfil-header">
+            <div class="avatar-placeholder">
+                <img src="{{ url_for('static', path='images/usuario.png') }}" alt="Admin">
+            </div>
+            <div>
+                <h1>Registro</h1>
+                <span style="color: rgba(255,255,255,0.7); font-size: 0.9em; text-transform: capitalize;">
+                    {{ rol }}
+                </span>
+            </div>
+        </div>
+        
+        <nav class="menu-lateral">
+            <a href="/panel-administracion?rol={{rol}}" class="menu-item">← Volver al Panel</a>
+        </nav>
+    </aside>
+
+    <!-- ÁREA PRINCIPAL -->
+    <main class="panel-derecho" style="overflow-y: auto;">
+        
+        <header class="header-principal">
+            <h2>Choferes Registrados</h2>
+            <p>Consulta la lista completa de choferes activos en la plataforma de Decarrerita.</p>
+        </header>
+
+        <div class="tarjeta-formulario" style="max-width: 100%;">
+            
+            {% if choferes == 0 %}
+                <div class="alerta-warning">
+                    No hay choferes registrados en el sistema actualmente.
+                </div>
+            {% else %}
+                <!-- CONTENEDOR DE LA TABLA ESTILIZADA -->
+                <div class="contenedor-tabla">
+                    <table class="tabla-estilizada">
+                        <thead>
+                            <tr>
+                                <th>ID Chofer</th>
+                                <th>Nombre Completo</th>
+                                <th>C.I</th>
+                                <th>Correo</th>
+                                <th>Calificación</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for usuario, chofer in choferes %}
+                            <tr>
+                                <td class="texto-negrita">{{ chofer.id_chofer }}</td>
+                                <td>{{ usuario.nombre }} {{ usuario.apellido }}</td>
+                                <td>{{ usuario.cedula }}</td>
+                                <td class="texto-gris">{{ usuario.correo }}</td>
+                                <td class="texto-naranja">{{ chofer.calificacion }} ⭐</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+            
+        </div>
+        
+    </main>
+</div>
+{% endblock %}

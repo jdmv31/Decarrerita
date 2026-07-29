@@ -17,8 +17,7 @@
         </div>
         
         <nav class="menu-lateral">
-            <!-- Nota: Puedes cambiar 'superadmin' por '{{ rol }}' si necesitas que sea dinámico -->
-            <a href="/panel-administracion?rol=superadmin" class="menu-item">← Volver al Panel</a>
+            <a href="/panel-administracion?rol={{ rol }}&id_admin={{ id_admin }}" class="menu-item">🔙 Volver al Panel</a>
         </nav>
     </aside>
 
@@ -74,12 +73,13 @@
         
         <form action="/administracion/evaluacion/guardar" method="POST">
             <input type="hidden" name="id_evaluacion" id="idEvaluacionModal" value="">
+            <input type="hidden" name="rol" value="{{ rol }}">
+            <input type="hidden" name="id_admin" value="{{ id_admin }}">
             
             <div class="grupo-input" style="margin-bottom: 25px;">
                 <label style="display: block; font-size: 0.95rem; color: #475569; margin-bottom: 8px; font-weight: bold;">
                     Puntuación de la prueba (1-100):
                 </label>
-                <!-- Reutilizamos los estilos de input que ya tienes -->
                 <input type="number" name="puntuacion" min="1" max="100" placeholder="Ej. 85" required 
                        style="width: 100%; padding: 14px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 1rem; box-sizing: border-box;">
             </div>

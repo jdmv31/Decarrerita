@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}¡Nuevo Viaje! - Decarrerita{% endblock %}
+
+{% block content %}
+    <style>
+        .alerta-viaje {
+            animation: latido 1.5s infinite;
+        }
+        @keyframes latido {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+    </style>
+
+    <!-- modal-overlay oscurece y difumina el fondo. Forzamos flex para hacerlo visible -->
+    <div class="modal-overlay" style="display: flex;">
+        
+        <!-- modal-contenido crea la tarjeta centrada. Añadimos tu animación alerta-viaje -->
+        <div class="modal-contenido alerta-viaje" style="border: 2px solid #052659; text-align: center;">
+            
+            <h2 class="modal-titulo" style="margin-top: 0;">¡Nuevo Viaje Solicitado!</h2>
+            <p class="modal-subtitulo">Tienes <strong id="contador" style="color: #dc3545; font-size: 1.2em;">60</strong> segundos para responder.</p>
+
+            <div class="dato-item" style="margin-bottom: 25px;">
+                <!-- Datos del Pasajero -->
+                <img src="{{ url_for('static', path='images/usuario.png') }}" alt="Foto pasajero" style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; margin-bottom: 10px;">
+                <h3 class="modal-titulo" style="margin-bottom: 5px; font-size: 1.4rem;">{{ nombre_pasajero }}</h3>
+                <p class="texto-descripcion" style="margin-bottom: 15px;">
+                    ⭐ {{ calificacion_pasajero }} <span style="font-size: 0.8em; opacity: 0.7;">/ 5.0</span>
+                </p>
+                
+                <div style="border-top: 1px dashed #cbd5e1; margin: 15px 0;"></div>
+                
+                <!-- Datos del Viaje -->
+                <p class="texto-descripcion" style="margin-bottom: 10px;">Ruta: {{ viaje.distancia }} km (Aprox. {{ viaje.duracion }} min)</p>
+                <h2 class="modal-titulo monto-positivo" style="font-size: 2.2rem; margin-bottom: 5px;">${{ viaje.costo_viaje }}</h2>
+                <p class="texto-descripcion" style="font-size: 0.85rem; margin-bottom: 0;">Costo Total del Traslado</p>
+            </div>
+
+            <!-- display: flex asegura que los botones estén uno al lado del otro -->
+            <form id="form_decision" action="/chofer/procesar-viaje" method="POST" style="display: flex; gap: 15px; margin-bottom: 0;">
+                <input type="hidden" name="id_chofer" value="{{ id_chofer }}">
+                <input type="hidden" name="id_viaje" value="{{ viaje.id_viaje }}">
+                <input type="hidden" name="decision" id="decision_input" value="rechazar">
+
+                <!-- Botones que heredan el estilo corporativo y se reparten el ancho -->
+                <button type="button" onclick="enviarDecision('rechazar')" class="btn-ancho btn-rojo" style="margin-bottom: 0;">
+                    Rechazar
+                </button>
+                <button type="button" onclick="enviarDecision('aceptar')" class="btn-ancho btn-verde" style="margin-bottom: 0;">
+                    Aceptar Viaje
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let tiempoRestante = 60;
+        const contadorDOM = document.getElementById('contador');
+        const formulario = document.getElementById('form_decision');
+        const inputDecision = document.getElementById('decision_input');
+
+        function enviarDecision(decision) {
+            inputDecision.value = decision;
+            formulario.submit();
+        }
+
+        const temporizador = setInterval(() => {
+            tiempoRestante--;
+            contadorDOM.innerText = tiempoRestante;
+
+            if (tiempoRestante <= 10) {
+                contadorDOM.style.animation = "latido 0.5s infinite";
+            }
+            
+            if (tiempoRestante <= 0) {
+                clearInterval(temporizador);
+                enviarDecision('rechazar'); 
+            }
+        }, 1000);
+    </script>
+{% endblock %}

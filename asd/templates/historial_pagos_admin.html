@@ -96,7 +96,6 @@
                     <th>Ganancia Chofer (70%)</th>
                     <th>Ganancia Empresa (30%)</th>
                     <th>Detalles de Pago</th>
-                    <th>Liquidado por</th>
                 </tr>
             </thead>
             <tbody>
@@ -121,6 +120,8 @@
                     {% else %}
                         <td style="color: #16a34a; font-weight: bold;">+${{ item.ganancia_empresa }}</td>
                     {% endif %}
+                    
+                    <!-- NUEVA CELDA: Detalles de pago -->
                     <td>
                         {% if item.estado == 'PAGADO' %}
                             <span style="font-size: 0.9em; color: #555;">
@@ -133,13 +134,6 @@
                             <span style="color: #999; font-size: 0.9em;">N/A</span>
                         {% else %}
                             <span style="color: #f59e0b; font-size: 0.9em;">Pendiente</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if item.admin %}
-                            <span style="font-weight: 500; color: #052659;">{{ item.admin.nombre }} {{ item.admin.apellido }}</span>
-                        {% else %}
-                            <span style="color: #999;">---</span>
                         {% endif %}
                     </td>
                 </tr>

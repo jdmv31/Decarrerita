@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Reporte de Traslados - Decarrerita{% endblock %}
+
+{% block content %}
+    <div>
+        <h1>Reporte General de Traslados</h1>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>ID Viaje</th>
+                    <th>Origen</th>
+                    <th>Destino</th>
+                    <th>Distancia (km)</th>
+                    <th>Costo</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for viaje in viajes %}
+                <tr>
+                    <td>{{ viaje.id }}</td>
+                    <td>{{ viaje.lugar_inicio }}</td>
+                    <td>{{ viaje.lugar_destino }}</td>
+                    <td>{{ viaje.distancia }}</td>
+                    <td>{{ viaje.costo_viaje }}</td>
+                    <td>{{ viaje.estado_viaje.value }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td>No hay viajes registrados en la base de datos todavía.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <a>Volver al Inicio</a>
+    </div>
+{% endblock %}
