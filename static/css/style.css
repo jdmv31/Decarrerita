@@ -243,7 +243,7 @@ button:hover {
     flex-direction: column;
     gap: 35px;
     box-shadow: -5px 0 25px rgba(0,0,0,0.2);
-    overflow: hidden;
+    overflow-y: auto;
 }
 
 .header-principal h2 {
