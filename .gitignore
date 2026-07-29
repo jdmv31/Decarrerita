@@ -5,3 +5,4 @@ __pycache__/
 *.pyc
 alembic.ini
 root.py
+asd/
